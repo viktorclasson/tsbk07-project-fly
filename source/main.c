@@ -140,7 +140,7 @@ void printVector(Point3D *v)
 
 void init_objects()
 {
-  sphere = LoadModelPlus("objects/groundsphere.obj"); 
+  sphere = LoadModelPlus("objects/space_frigate_6.obj"); 
 }
 
  float get_bottom(Model *m)
@@ -267,7 +267,7 @@ void draw_object()
 	MatrixMultPoint3D(mtwMatrix,&position,&position);
 	
 	float ycoord;
-	ycoord = calc_object_ycoord(position.x, position.z);
+	ycoord = calc_object_ycoord(position.x, position.z)+20;
 	
 	//printf("%f \n",ycoord);
 	
