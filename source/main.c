@@ -117,10 +117,17 @@ Model* GenerateTerrain(TextureData *tex)
 
 // vertex array object
 Model *m, *m2, *tm, *sphere;
+// Skybox
+Model *skybox;
 // Reference to shader program
 GLuint program;
+GLuint sky_program;
+
+// Texture
 GLuint tex1, tex2;
+GLuint skytex;
 TextureData ttex; // terrain
+
 
 float animation;
 float animation_speed;
@@ -166,6 +173,14 @@ void init(void)
 	animation_speed = 0.1;
 	
 	// Load and compile shader
+	sky_program = loadShaders("shaders/skybox.vert","shaders/skybox.frag");
+	glUseProgram(sky_program);
+	
+	// Sky
+	skybox = LoadModelPlus("objects/skybox.obj");
+	LoadTGATextureSimple("textures/SkyBox512.tga", &skytex);	
+	
+	
 	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
 	glUseProgram(program);
 	printError("init shader");
@@ -236,7 +251,6 @@ float calc_object_ycoord(float pos_x, float pos_z)
 	return ycoord;
   
 }
-
 
 void draw_object()
 {
@@ -374,6 +388,30 @@ void display(void)
 	
 	printError("pre display");
 	
+	// Skybox
+	GLfloat sky_cameraMatrix[16];
+	GLfloat sky_mdlMatrix[16];
+	T(camera_position.x,camera_position.y,camera_position.z,sky_mdlMatrix);
+	lookAt(&camera_position,&camera_look,0,1,0,camMatrix);
+	CopyMatrix(camMatrix,sky_cameraMatrix);
+	sky_cameraMatrix[3] = 0;
+	sky_cameraMatrix[7] = -0.5;
+	sky_cameraMatrix[11] = 0;
+	
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glUseProgram(sky_program);
+	glBindTexture(GL_TEXTURE_2D, skytex);
+	glUniform1i(glGetUniformLocation(sky_program, "texUnit"), 0); // Texture unit 1
+	glUniformMatrix4fv(glGetUniformLocation(sky_program, "projMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(sky_program, "camMatrix"), 1, GL_TRUE, sky_cameraMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(sky_program, "mdlMatrix"), 1, GL_TRUE, sky_mdlMatrix);
+	DrawModel(skybox, sky_program, "in_Position", "in_Normal", "inTexCoord");
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	
+	
+	// Main program
 	glUseProgram(program);
 
 	// Build matrix
@@ -407,8 +445,8 @@ int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize (600, 600);
-	glutCreateWindow ("TSBK07 Lab 4");
+	glutInitWindowSize (800, 800);
+	glutCreateWindow ("I believe I can fly");
 	glutDisplayFunc(display);
 	init ();
 	initKeymapManager();
