@@ -6,10 +6,10 @@
 	// Linking hint for Lightweight IDE
 	// uses framework Cocoa
 #endif
-#include "GL_utilities.h"
-#include "VectorUtils2.h"
-#include "loadobj.h"
-#include "LoadTGA2.h"
+#include "utils/GL_utilities.h"
+#include "utils/VectorUtils2.h"
+#include "utils/loadobj.h"
+#include "utils/LoadTGA2.h"
 
 #include <math.h>
 
