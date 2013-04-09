@@ -210,48 +210,56 @@ float calc_object_ycoord(float pos_x, float pos_z)
 	float z_frac = pos_z - floor(pos_z);
 	int upper_triangle;
 	float ycoord;
-  
-	if(1-z_frac > x_frac)
+	
+	if(pos_x >= 0 && pos_y >= 0 && pos_x < 256 && pos_y < 256)
 	{
-		upper_triangle = 1; 
+	  if(1-z_frac > x_frac)
+	  {
+		  upper_triangle = 1; 
+	  }
+	  else
+	  {
+		  upper_triangle = 0; 
+	  }
+    
+	  if(upper_triangle)
+	  {
+	    float ycoord1=Heightmap[(int)floor(pos_x)][(int)floor(pos_z)];
+	    float ycoord2=Heightmap[(int)floor(pos_x)][(int)ceil(pos_z)];
+	    float ycoord3=Heightmap[(int)ceil(pos_x)][(int)floor(pos_z)];
+	    Point3D p1 = {0, ycoord1, 0};
+	    Point3D p2 = {0, ycoord2, 1};
+	    Point3D p3 = {1, ycoord3, 0};
+	    Point3D v, u, n;
+	    VectorSub(&p1, &p2, &v);
+	    VectorSub(&p1, &p3, &u);
+	    CrossProduct(&v, &u, &n);
+	    Normalize(&n);
+	    float d = - n.y*ycoord1;
+	    ycoord = (-d - n.x*x_frac - n.z*z_frac)/n.y;
+	  }
+	  else
+	  {
+	    float ycoord1=Heightmap[(int)ceil(pos_x)][(int)ceil(pos_z)];
+	    float ycoord2=Heightmap[(int)floor(pos_x)][(int)ceil(pos_z)];
+	    float ycoord3=Heightmap[(int)ceil(pos_x)][(int)floor(pos_z)];
+	    Point3D p1 = {1, ycoord1, 1};
+	    Point3D p2 = {0, ycoord2, 1};
+	    Point3D p3 = {1, ycoord3, 0};
+	    Point3D v, u, n;
+	    VectorSub(&p1, &p2, &v);
+	    VectorSub(&p1, &p3, &u);
+	    CrossProduct(&u,&v,&n);
+	    Normalize(&n);
+	    float d = - n.y*ycoord1 - n.x*1 - n.z*1;
+	    ycoord = (-d - n.x*x_frac - n.z*z_frac)/n.y;
+	  }
 	}
 	else
 	{
-		upper_triangle = 0; 
+	 ycoord = 0.0; 
 	}
-  
-  	if(upper_triangle)
-	{
-	  float ycoord1=Heightmap[(int)floor(pos_x)][(int)floor(pos_z)];
-	  float ycoord2=Heightmap[(int)floor(pos_x)][(int)ceil(pos_z)];
-	  float ycoord3=Heightmap[(int)ceil(pos_x)][(int)floor(pos_z)];
-	  Point3D p1 = {0, ycoord1, 0};
-	  Point3D p2 = {0, ycoord2, 1};
-	  Point3D p3 = {1, ycoord3, 0};
-	  Point3D v, u, n;
-	  VectorSub(&p1, &p2, &v);
-	  VectorSub(&p1, &p3, &u);
-	  CrossProduct(&v, &u, &n);
-	  Normalize(&n);
-	  float d = - n.y*ycoord1;
-	  ycoord = (-d - n.x*x_frac - n.z*z_frac)/n.y;
-	}
-	else
-	{
-	  float ycoord1=Heightmap[(int)ceil(pos_x)][(int)ceil(pos_z)];
-	  float ycoord2=Heightmap[(int)floor(pos_x)][(int)ceil(pos_z)];
-	  float ycoord3=Heightmap[(int)ceil(pos_x)][(int)floor(pos_z)];
-	  Point3D p1 = {1, ycoord1, 1};
-	  Point3D p2 = {0, ycoord2, 1};
-	  Point3D p3 = {1, ycoord3, 0};
-	  Point3D v, u, n;
-	  VectorSub(&p1, &p2, &v);
-	  VectorSub(&p1, &p3, &u);
-	  CrossProduct(&u,&v,&n);
-	  Normalize(&n);
-	  float d = - n.y*ycoord1 - n.x*1 - n.z*1;
-	  ycoord = (-d - n.x*x_frac - n.z*z_frac)/n.y;
-	}
+	
 	
 	return ycoord;
   
