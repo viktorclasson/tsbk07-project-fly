@@ -17,5 +17,5 @@ void main(void)
   diffuselight = max(dot(worldNormal,light_pos),0);
   outColor = outColor + vec4(diffuselight*vec3(1.0, 1.0, 1.0),1.0);
 
-  outColor = outColor*texture(tex, texCoord) + vec4(0.2, 0.2, 0.2, 0);
+  outColor = outColor*texture(tex, texCoord) + vec4(0.2, 0.2, 0.2, 1.0);
 }

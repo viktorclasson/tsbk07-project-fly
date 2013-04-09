@@ -11,7 +11,7 @@
 #include "utils/VectorUtils2.h"
 #include "utils/loadobj.h"
 #include "utils/LoadTGA2.h"
-#include "utils/generate_terrain.h"
+#include "utils/generate_terrain2.h"
 
 #include <math.h>
 
@@ -34,88 +34,7 @@ GLfloat zl = 100;
 
 
 GLfloat camMatrix[16];
-float Heightmap[256][256];
-/*
-Model* GenerateTerrain(TextureData *tex)
-{
-	int vertexCount = tex->width * tex->height;
-	int triangleCount = (tex->width-1) * (tex->height-1) * 2;
-	int x, z;
-	//printf("%d %d \n",tex->width,tex->height);
-	//float Heightmap[tex->height][tex->width];
-	
-	GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
-	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
-	GLfloat *texCoordArray = malloc(sizeof(GLfloat) * 2 * vertexCount);
-	GLuint *indexArray = malloc(sizeof(GLuint) * triangleCount*3);
-	Point3D u;
-	Point3D v;
-	
-	printf("bpp %d\n", tex->bpp);
-	for (x = 0; x < tex->width; x++)
-		for (z = 0; z < tex->height; z++)
-		{
-// Vertex array. You need to scale this properly
-			vertexArray[(x + z * tex->width)*3 + 0] = x / 1.0;
-			vertexArray[(x + z * tex->width)*3 + 1] = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 10.0;
-			vertexArray[(x + z * tex->width)*3 + 2] = z / 1.0;
-			Heightmap[x][z]=tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 10.0;
-// Normal vectors. You need to calculate these.
-			if ((x<=0) || (z<=0) || (x >= tex->width-1) || (z >= tex->width-1))
-			{
-			  normalArray[(x + z * tex->width)*3 + 0] = 0.0;
-			  normalArray[(x + z * tex->width)*3 + 1] = 1.0;
-			  normalArray[(x + z * tex->width)*3 + 2] = 0.0;
-			}
-			else
-			{
-			 u.x=2; u.y=tex->imageData[(x-1 + z * tex->width) * (tex->bpp/8)] / 100.0-tex->imageData[(x+1 + z * tex->width) * (tex->bpp/8)] / 100.0; u.z=0;
-			 v.x=0; v.y=tex->imageData[(x + (z-1) * tex->width) * (tex->bpp/8)] / 100.0-tex->imageData[(x + (z+1) * tex->width) * (tex->bpp/8)] / 100.0; v.z=2;
-			 Normalize(&u);
-			 Normalize(&v);
-			 CrossProduct(&v,&u,&u);
-			 normalArray[(x + z * tex->width)*3 + 0] = u.x;
-			  normalArray[(x + z * tex->width)*3 + 1] = u.y;
-			  normalArray[(x + z * tex->width)*3 + 2] = u.z;
-			  
-			}
-
-			//printf("x: %d, z: %d, normaly: %f \n",x,z,u.y);
-// Texture coordinates. You may want to scale them.
-			texCoordArray[(x + z * tex->width)*2 + 0] = x; // (float)x / tex->width;
-			texCoordArray[(x + z * tex->width)*2 + 1] = z; // (float)z / tex->height;
-		}
-	for (x = 0; x < tex->width-1; x++)
-		for (z = 0; z < tex->height-1; z++)
-		{
-		// Triangle 1
-			indexArray[(x + z * (tex->width-1))*6 + 0] = x + z * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 1] = x + (z+1) * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 2] = x+1 + z * tex->width;
-		// Triangle 2
-			indexArray[(x + z * (tex->width-1))*6 + 3] = x+1 + z * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 4] = x + (z+1) * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 5] = x+1 + (z+1) * tex->width;
-		}
-	
-	
-	
-	// End of terrain generation
-	
-	// Create Model and upload to GPU:
-
-	Model* model = LoadDataToModel(
-			vertexArray,
-			normalArray,
-			texCoordArray,
-			NULL,
-			indexArray,
-			vertexCount,
-			triangleCount*3);
-
-	return model;
-}
-*/
+float Heightmap[512][512];
 
 // vertex array object
 Model *m, *m2, *tm, *sphere;
@@ -195,13 +114,15 @@ void init(void)
 	
 // Load terrain data
 	
-	LoadTGATexture("textures/fft-terrain.tga", &ttex);
+	LoadTGATexture("textures/terrain.tga", &ttex);
 	tm = GenerateTerrain(&ttex,&camera_position);
 
 	GenerateHeightmap(&Heightmap);
 
 	bottom_sphere = get_bottom(sphere);
 	printError("init terrain");
+	
+
 }
 
 float calc_object_ycoord(float pos_x, float pos_z)
@@ -211,7 +132,7 @@ float calc_object_ycoord(float pos_x, float pos_z)
 	int upper_triangle;
 	float ycoord;
 	
-	if(pos_x >= 0 && pos_y >= 0 && pos_x < 256 && pos_y < 256)
+	if(pos_x >= 0 && pos_z >= 0 && pos_x < 256 && pos_z < 256)
 	{
 	  if(1-z_frac > x_frac)
 	  {
@@ -422,7 +343,7 @@ void display(void)
 	DrawModel(skybox, sky_program, "in_Position", "in_Normal", "inTexCoord");
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	printf("x: %f, z: %f\n",camera_position.x,camera_position.z);
+	//printf("x: %f, z: %f\n",camera_position.x,camera_position.z);
 	
 	
 	// Main program
@@ -433,6 +354,7 @@ void display(void)
 	keyboard();
 	//Point3D camera_position = {0, 5, 8};
 	//Point3D camera_look = {2, 0, 2};
+
 	if(camera_position.y - 5 < calc_object_ycoord(camera_position.x, camera_position.z))
 	{
 	  camera_position.y = calc_object_ycoord(camera_position.x, camera_position.z) + 5;

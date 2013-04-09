@@ -1,6 +1,7 @@
 // Generate Terrain, generates a terrain at around a certain point.
 
-#include "generate_terrain.h"
+#include "generate_terrain2.h"
+#include <float.h>
 
 
 Model* GenerateTerrain(TextureData *tex,Point3D *camera_position)
@@ -12,10 +13,10 @@ Model* GenerateTerrain(TextureData *tex,Point3D *camera_position)
 	//printf("%d %d \n",tex->width,tex->height);
 	//float Heightmap[tex->height][tex->width];
 	
-	GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
-	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
-	GLfloat *texCoordArray = malloc(sizeof(GLfloat) * 2 * vertexCount);
-	GLuint *indexArray = malloc(sizeof(GLuint) * triangleCount*3);
+	GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * (vertexCount+8));
+	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * (vertexCount+8));
+	GLfloat *texCoordArray = malloc(sizeof(GLfloat) * 2 * (vertexCount+8));
+	GLuint *indexArray = malloc(sizeof(GLuint) * (triangleCount+12)*3);
 	Point3D u;
 	Point3D v;
 	
@@ -66,8 +67,19 @@ Model* GenerateTerrain(TextureData *tex,Point3D *camera_position)
 			indexArray[(x + z * (tex->width-1))*6 + 5] = x+1 + (z+1) * tex->width;
 		}
 	
+	/*
+	vertexArray[(tex->width + tex->height * tex->width)*3 + 0] = FLT_MAX;
+	vertexArray[(tex->width + tex->height * tex->width)*3 + 1] = 0;
+	vertexArray[(tex->width + tex->height * tex->width)*3 + 2] = FLT_MAX;
 	
+	vertexArray[(tex->width + tex->height * tex->width)*3 + 3] = FLT_MAX;
+	vertexArray[(tex->width + tex->height * tex->width)*3 + 4] = 0;
+	vertexArray[(tex->width + tex->height * tex->width)*3 + 5] = -FLT_MAX;
 	
+	indexArray[(tex->width + tex->height * tex->width)*6 + 0] = tex->width + tex->height * tex->width;
+	indexArray[(tex->width + tex->height * tex->width)*6 + 1] = tex->width + tex->height * tex->width+1;
+	indexArray[(tex->width + tex->height * tex->width)*6 + 2] = tex->width + tex->height * tex->width-1;
+	*/
 	// End of terrain generation
 	
 	// Create Model and upload to GPU:
