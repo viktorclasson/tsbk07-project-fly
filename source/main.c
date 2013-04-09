@@ -1,4 +1,4 @@
-// Lab 4, terrain generation
+// I believe I can fly, a flight simulator
 
 #ifdef __APPLE__
 	#include <OpenGL/gl3.h>
@@ -6,10 +6,12 @@
 	// Linking hint for Lightweight IDE
 	// uses framework Cocoa
 #endif
+
 #include "utils/GL_utilities.h"
 #include "utils/VectorUtils2.h"
 #include "utils/loadobj.h"
 #include "utils/LoadTGA2.h"
+#include "utils/generate_terrain.h"
 
 #include <math.h>
 
@@ -33,7 +35,7 @@ GLfloat zl = 100;
 
 GLfloat camMatrix[16];
 float Heightmap[256][256];
-
+/*
 Model* GenerateTerrain(TextureData *tex)
 {
 	int vertexCount = tex->width * tex->height;
@@ -113,7 +115,7 @@ Model* GenerateTerrain(TextureData *tex)
 
 	return model;
 }
-
+*/
 
 // vertex array object
 Model *m, *m2, *tm, *sphere;
@@ -194,7 +196,10 @@ void init(void)
 // Load terrain data
 	
 	LoadTGATexture("textures/fft-terrain.tga", &ttex);
-	tm = GenerateTerrain(&ttex);
+	tm = GenerateTerrain(&ttex,&camera_position);
+
+	GenerateHeightmap(&Heightmap);
+
 	bottom_sphere = get_bottom(sphere);
 	printError("init terrain");
 }
@@ -409,6 +414,7 @@ void display(void)
 	DrawModel(skybox, sky_program, "in_Position", "in_Normal", "inTexCoord");
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	printf("x: %f, z: %f\n",camera_position.x,camera_position.z);
 	
 	
 	// Main program
@@ -423,6 +429,10 @@ void display(void)
 	{
 	  camera_position.y = calc_object_ycoord(camera_position.x, camera_position.z) + 5;
 	}
+	
+	//tm = GenerateTerrain(&ttex,&camera_position);
+
+	//GenerateHeightmap(&Heightmap);
 
 	// Create camera matrix
 	lookAt(&camera_position,&camera_look,0,1,0,camMatrix);
