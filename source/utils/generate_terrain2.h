@@ -14,6 +14,7 @@
 #include "loadobj.h"
 #include "LoadTGA2.h"
 
+
 //float *Heightmap[256][256]
 float Heightmap[512][512];
 

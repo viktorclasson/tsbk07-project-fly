@@ -27,6 +27,7 @@ GLfloat xp = 120;
 GLfloat yp = 20;
 GLfloat zp = 120;
 
+
 // Starting look
 GLfloat xl = 100;
 GLfloat yl = 0;
@@ -53,6 +54,7 @@ TextureData ttex; // terrain
 float animation;
 float animation_speed;
 float bottom_sphere;
+GLfloat x_old,z_old;
 
 void printVector(Point3D *v)
 {
@@ -85,12 +87,14 @@ void init(void)
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projectionMatrix);
+	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 600.0, projectionMatrix);
 
 	// Init some variables
 	y_hat.x = 0; y_hat.y = 1; y_hat.z = 0;
 	camera_look.x = xl; camera_look.y = yl; camera_look.z = zl; 
 	camera_position.x = xp; camera_position.y = yp; camera_position.z = zp;
+	x_old=xp;
+	z_old=zp;
 	animation_speed = 0.1;
 	
 	// Load and compile shader
@@ -332,6 +336,15 @@ void display(void)
 	sky_cameraMatrix[7] = -0.5;
 	sky_cameraMatrix[11] = 0;
 	
+	if((camera_position.x - x_old > 50 ) || (camera_position.x - x_old < -50 ) || (camera_position.z - z_old > 50 ) || (camera_position.z - z_old < -50 ))
+	{
+		tm = GenerateTerrain(&ttex,&camera_position);
+		x_old=camera_position.x;
+		z_old=camera_position.z;
+		printf("x: %f, z: %f \n",x_old,z_old);
+	}
+
+
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	glUseProgram(sky_program);
