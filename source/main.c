@@ -35,7 +35,8 @@ GLfloat zl = 100;
 
 
 GLfloat camMatrix[16];
-float Heightmap[512][512];
+// The last row is for central position
+float Heightmap[512][513];
 
 // vertex array object
 Model *m, *m2, *tm, *sphere;
@@ -128,6 +129,29 @@ void init(void)
 	
 
 }
+// For debugging, should be inside return_height
+int x_heightmap;
+int z_heightmap;
+int x_center;
+int z_center;
+
+float return_height(int pos_x, int pos_z)
+{
+  x_center = (int)Heightmap[1][513];
+  z_center = (int)Heightmap[2][513];
+  x_heightmap = x_center-pos_x+512/2;
+  z_heightmap = z_center-pos_z+512/2;
+
+  if (!(x_heightmap < 0) && (x_heightmap < 513) && !(z_heightmap < 0) && (z_heightmap < 513))
+  { 
+   return Heightmap[x_heightmap][z_heightmap];
+  }
+  else
+  {
+    printf("Error: value out of bounds for Heightmap. x: %d z: %d \n",x_heightmap,z_heightmap);
+    return 0.0;
+  }
+}
 
 float calc_object_ycoord(float pos_x, float pos_z)
 {
@@ -149,9 +173,9 @@ float calc_object_ycoord(float pos_x, float pos_z)
     
 	  if(upper_triangle)
 	  {
-	    float ycoord1=Heightmap[(int)floor(pos_x)][(int)floor(pos_z)];
-	    float ycoord2=Heightmap[(int)floor(pos_x)][(int)ceil(pos_z)];
-	    float ycoord3=Heightmap[(int)ceil(pos_x)][(int)floor(pos_z)];
+	    float ycoord1=return_height((int)floor(pos_x),(int)floor(pos_z));
+	    float ycoord2=return_height((int)floor(pos_x),(int)ceil(pos_z));
+	    float ycoord3=return_height((int)ceil(pos_x),(int)floor(pos_z));
 	    Point3D p1 = {0, ycoord1, 0};
 	    Point3D p2 = {0, ycoord2, 1};
 	    Point3D p3 = {1, ycoord3, 0};
@@ -165,9 +189,9 @@ float calc_object_ycoord(float pos_x, float pos_z)
 	  }
 	  else
 	  {
-	    float ycoord1=Heightmap[(int)ceil(pos_x)][(int)ceil(pos_z)];
-	    float ycoord2=Heightmap[(int)floor(pos_x)][(int)ceil(pos_z)];
-	    float ycoord3=Heightmap[(int)ceil(pos_x)][(int)floor(pos_z)];
+	    float ycoord1=return_height((int)ceil(pos_x),(int)ceil(pos_z));
+	    float ycoord2=return_height((int)floor(pos_x),(int)ceil(pos_z));
+	    float ycoord3=return_height((int)ceil(pos_x),(int)floor(pos_z));
 	    Point3D p1 = {1, ycoord1, 1};
 	    Point3D p2 = {0, ycoord2, 1};
 	    Point3D p3 = {1, ycoord3, 0};
@@ -342,6 +366,7 @@ void display(void)
 		x_old=camera_position.x;
 		z_old=camera_position.z;
 		printf("x: %f, z: %f \n",x_old,z_old);
+		printf("Heightmap: x: %d, z: %d \n Center: x: %d, z: %d \n",x_heightmap,z_heightmap,x_center,z_center);
 	}
 
 

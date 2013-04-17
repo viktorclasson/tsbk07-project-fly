@@ -12,13 +12,11 @@
 // For debugging
 #include <time.h>
 
-
+// The terrain will be built like this:
+// High resolution terrain, 512*512
 int mapvertexsize = 512;
 int highressize=512;
 int lowressize=128;
-
-// The terrain will be built like this:
-// High resolution terrain, 512*512
 
 Model* GenerateTerrain(TextureData *tex,Point3D *current_position)
 {
@@ -39,7 +37,8 @@ Model* GenerateTerrain(TextureData *tex,Point3D *current_position)
 	int x,z;
 	float heightfactor = 7.0;
 	//printf("%d %d \n",tex->width,tex->height);
-	//float Heightmap[tex->height][tex->width];
+	// Defines centralpoint of heightmap
+	printf("Current: %d %d \n",x_current,z_current);
 	
 	GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * (vertexCount+8));
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * (vertexCount+8));
@@ -58,19 +57,20 @@ Model* GenerateTerrain(TextureData *tex,Point3D *current_position)
 			vertexArray[(n_x + n_z * highressize)*3 + 0] = x / 1.0;
 			if((x >= 0) && (x < tex->width) && (z >= 0) && (z < tex->width))
 			{
-				clock_gettime(CLOCK_REALTIME, &t1);
+				//clock_gettime(CLOCK_REALTIME, &t1);
 				vertexArray[(n_x + n_z * highressize)*3 + 1] = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / heightfactor;
-				clock_gettime(CLOCK_REALTIME, &t2);
+				//clock_gettime(CLOCK_REALTIME, &t2);
 			}
 			else
 			{
 				//vertexArray[(n_x + n_z * highressize)*3 + 1] = tex->imageData[(n_x + n_z * tex->width) * (tex->bpp/8)] / 30.0;
-				clock_gettime(CLOCK_REALTIME, &t3);
+				//clock_gettime(CLOCK_REALTIME, &t3);
 				//srand((unsigned)time(NULL));
 				vertexArray[(n_x + n_z * highressize)*3 + 1] = 0;
-				clock_gettime(CLOCK_REALTIME, &t4);
+				//clock_gettime(CLOCK_REALTIME, &t4);
 				//printf("RAND: %d \n",rand()%10);
 			}
+			Heightmap[n_x][n_z]=vertexArray[(n_x + n_z * highressize)*3 + 1];
 			vertexArray[(n_x + n_z * highressize)*3 + 2] = z / 1.0;
 			// Normal vectors
 			if ((x<=0) || (z<=0) || (x >= tex->width-1) || (z >= tex->width-1))
@@ -172,11 +172,12 @@ Model* GenerateTerrain(TextureData *tex,Point3D *current_position)
 	*/
 
 
-
+	Heightmap[1][513]=x_current;
+	Heightmap[2][513]=z_current;
 	// End of terrain generation
 	
 	// Debugging
-	printf("******* \n Time1: %d ns \n Randomtime: %d ns \n******** \n",t2.tv_nsec-t1.tv_nsec,t4.tv_nsec-t3.tv_nsec);
+	// printf("******* \n Time1: %d ns \n Randomtime: %d ns \n******** \n",t2.tv_nsec-t1.tv_nsec,t4.tv_nsec-t3.tv_nsec);
 
 	// Create Model and upload to GPU:
 

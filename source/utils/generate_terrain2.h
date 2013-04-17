@@ -14,9 +14,8 @@
 #include "loadobj.h"
 #include "LoadTGA2.h"
 
-
-//float *Heightmap[256][256]
-float Heightmap[512][512];
+// Heightmap, the heightmap is the height of objects that are around the point defined in Heightmap[1-2][513]
+float Heightmap[512][513];
 
 Model* GenerateTerrain(TextureData *tex, Point3D *camera_position);
 
