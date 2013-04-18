@@ -39,22 +39,24 @@ GLfloat camMatrix[16];
 float Heightmap[512][513];
 
 // vertex array object
-Model *m, *m2, *tm, *sphere;
+Model *m, *m2, *tm, *plane, *tree;
 // Skybox
 Model *skybox;
 // Reference to shader program
 GLuint program;
 GLuint sky_program;
+GLuint tree_program;
 
 // Texture
-GLuint tex1, tex2;
+GLuint tex1, tex2, treetexbark, treetexleaf;
 GLuint skytex;
 TextureData ttex; // terrain
 
 
 float animation;
 float animation_speed;
-float bottom_sphere;
+float bottom_plane;
+float bottom_tree;
 GLfloat x_old,z_old;
 
 void printVector(Point3D *v)
@@ -64,14 +66,16 @@ void printVector(Point3D *v)
 
 void init_objects()
 {
-  sphere = LoadModelPlus("objects/space_frigate_6.obj"); 
+  plane = LoadModelPlus("objects/space_frigate_6.obj"); 
+  tree = LoadModelPlus("objects/tree1.obj");
+  skybox = LoadModelPlus("objects/skybox.obj");
 }
 
  float get_bottom(Model *m)
 {
 	int i;
 	float miny = 1e10;
-	
+	printf("numVertices: %d",m->numVertices);
 	for (i = 0; i < m->numVertices; i++)
 	{
 		if (m->vertexArray[3 * i+1] < miny) miny = m->vertexArray[3 * i+1];
@@ -103,10 +107,19 @@ void init(void)
 	glUseProgram(sky_program);
 	
 	// Sky
-	skybox = LoadModelPlus("objects/skybox.obj");
 	LoadTGATextureSimple("textures/SkyBox512.tga", &skytex);	
 	
+	// Trees
 	
+	tree_program=loadShaders("shaders/tree.vert","shaders/tree.frag");
+	glUseProgram(tree_program);
+	glUniform1i(glGetUniformLocation(tree_program, "texbark"), 1); // Texture unit 0
+	LoadTGATexture("objects/tree 1a - 1b/bark1.tga", &treetexbark);
+	//glUniform1i(glGetUniformLocation(tree_program, "texleaf"), 2); // Texture unit 1
+	//LoadTGATextureSimple("objects/tree 1a - 1b/leafs1.tga", &treetexleaf);
+	
+	
+	// Terrain
 	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
 	glUseProgram(program);
 	printError("init shader");
@@ -117,14 +130,15 @@ void init(void)
 	
 	init_objects();
 	
-// Load terrain data
+	// Load terrain data
 	
 	LoadTGATexture("textures/terrain.tga", &ttex);
 	tm = GenerateTerrain(&ttex,&camera_position);
 
 	GenerateHeightmap(&Heightmap);
 
-	bottom_sphere = get_bottom(sphere);
+	bottom_plane = get_bottom(plane);
+	bottom_tree = get_bottom(tree);
 	printError("init terrain");
 	
 
@@ -160,7 +174,7 @@ float calc_object_ycoord(float pos_x, float pos_z)
 	int upper_triangle;
 	float ycoord;
 	
-	if(pos_x >= 0 && pos_z >= 0 && pos_x < 256 && pos_z < 256)
+	if(pos_x >= 0 && pos_z >= 0 && pos_x < 512 && pos_z < 512)
 	{
 	  if(1-z_frac > x_frac)
 	  {
@@ -216,7 +230,7 @@ float calc_object_ycoord(float pos_x, float pos_z)
 
 void draw_object()
 {
-	
+	// Program
 	// Skapa mtwMatrix
 	GLfloat mtwMatrix[16], uppMatrix[16], rotMatrix[16], placeMatrix[16];
 	T(10,0,0,uppMatrix);
@@ -225,7 +239,7 @@ void draw_object()
 	T(100,0,100,placeMatrix);
 	Mult(placeMatrix,mtwMatrix,mtwMatrix);
 	
-	Point3D position = {0.0,bottom_sphere,0.0};	
+	Point3D position = {0.0,bottom_plane,0.0};	
 	MatrixMultPoint3D(mtwMatrix,&position,&position);
 	
 	float ycoord;
@@ -245,7 +259,34 @@ void draw_object()
 	
 	// Upload model to world matrix and draw objects
   	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, mtwMatrix);
- 	DrawModel(sphere, program, "inPosition", "inNormal", "texCoord");
+ 	DrawModel(plane, program, "inPosition", "inNormal", "texCoord");
+	
+	// Trees
+	position.y=bottom_tree;
+	position.x=0.0; 
+	position.z=0.0;
+	T(150,0,50,mtwMatrix);
+	MatrixMultPoint3D(mtwMatrix,&position,&position);
+	ycoord = calc_object_ycoord(position.x, position.z);
+	T(0,ycoord,0,placeMatrix);
+	Mult(placeMatrix,mtwMatrix,mtwMatrix);
+
+	printf("ycoord %f, Position %f %f \n",ycoord,position.x, position.z);
+	
+	glBindTexture(GL_TEXTURE_2D, treetexbark);
+	glUniform1i(glGetUniformLocation(tree_program, "texbark"), 0);
+	
+	// Upload projection matrix
+	glUniformMatrix4fv(glGetUniformLocation(tree_program, "projMatrix"), 1, GL_TRUE, projectionMatrix);
+	
+	// Upload camera matrix
+	glUniformMatrix4fv(glGetUniformLocation(tree_program, "camMatrix"), 1, GL_TRUE, camMatrix);
+	
+	// Upload model to world matrix and draw objects
+  	glUniformMatrix4fv(glGetUniformLocation(tree_program, "mdlMatrix"), 1, GL_TRUE, mtwMatrix);
+	
+	DrawModel(tree, tree_program, "inPosition", "inNormal", "texCoord");
+	
 
 }
 

@@ -21,7 +21,7 @@ int lowressize=128;
 Model* GenerateTerrain(TextureData *tex,Point3D *current_position)
 {
 	// For debugging
-	struct timespec t1,t2,t3,t4;
+	// struct timespec t1,t2,t3,t4;
 
 
 
