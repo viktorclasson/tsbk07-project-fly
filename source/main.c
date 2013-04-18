@@ -139,8 +139,8 @@ float return_height(int pos_x, int pos_z)
 {
   x_center = (int)Heightmap[1][513];
   z_center = (int)Heightmap[2][513];
-  x_heightmap = x_center-pos_x+512/2;
-  z_heightmap = z_center-pos_z+512/2;
+  x_heightmap = pos_x-x_center+256;
+  z_heightmap = pos_z-z_center+256;
 
   if (!(x_heightmap < 0) && (x_heightmap < 513) && !(z_heightmap < 0) && (z_heightmap < 513))
   { 
