@@ -271,7 +271,7 @@ void draw_object()
 	T(0,ycoord,0,placeMatrix);
 	Mult(placeMatrix,mtwMatrix,mtwMatrix);
 
-	printf("ycoord %f, Position %f %f \n",ycoord,position.x, position.z);
+	//printf("ycoord %f, Position %f %f \n",ycoord,position.x, position.z);
 	
 	glBindTexture(GL_TEXTURE_2D, treetexbark);
 	glUniform1i(glGetUniformLocation(tree_program, "texbark"), 0);

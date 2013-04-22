@@ -18,8 +18,14 @@ void main(void)
 {
 	mat3 normalMatrix1 = mat3(mdlMatrix);
 	worldNormal = normalize(normalMatrix1 * inNormal);
-	worldPosition = vec3(mdlMatrix * vec4(inPosition,1.0));
+	
+	// Generate terrain
+	vec3 test_position = inPosition;
+	test_position.y = sin(inPosition.x/40)*sin(inPosition.z/40)*20+sin(inPosition.x/300)*sin(inPosition.z/200)*5;
+	
+	
+	worldPosition = vec3(mdlMatrix * vec4(test_position,1.0));
 	texCoord = inTexCoord;
-	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(inPosition, 1.0);
+	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(test_position, 1.0);
 }
 

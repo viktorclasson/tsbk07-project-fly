@@ -38,7 +38,7 @@ Model* GenerateTerrain(TextureData *tex,Point3D *current_position)
 	float heightfactor = 7.0;
 	//printf("%d %d \n",tex->width,tex->height);
 	// Defines centralpoint of heightmap
-	printf("Current: %d %d \n",x_current,z_current);
+	//printf("Current: %d %d \n",x_current,z_current);
 	
 	GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * (vertexCount+8));
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * (vertexCount+8));
