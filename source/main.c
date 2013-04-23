@@ -66,7 +66,7 @@ void printVector(Point3D *v)
 
 void init_objects()
 {
-  plane = LoadModelPlus("objects/Harrier-GR.1.obj"); 
+  plane = LoadModelPlus("objects/space_frigate_6.obj"); 
   tree = LoadModelPlus("objects/tree1.obj");
   skybox = LoadModelPlus("objects/skybox.obj");
 }

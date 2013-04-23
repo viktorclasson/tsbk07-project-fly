@@ -1,4 +1,4 @@
-#version 130
+#version 150
 
 // From the vertex shader
 in vec2 texcoord;
