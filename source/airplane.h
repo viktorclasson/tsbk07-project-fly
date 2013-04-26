@@ -12,8 +12,9 @@
 #include "utils/loadobj.h"
 #include "utils/LoadTGA2.h"
 
-void Airplane_Init(void);
-void Airplane_Keyboard(Point3D &yawRate, Point3D &pitchRate, Point3D &rollRate);
-void Airplane_Draw(GLfloat* camMatrix, GLfloat* projMatrix, GLfloat* mdlMatrix);
+void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate);
+void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate);
+void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* projMatrix);
+void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* projMatrix, GLfloat* mdlMatrix, GLfloat* normalMatrix);
 
 #endif

@@ -1,4 +1,4 @@
-#include dynamics.h
+#include "dynamics.h"
 
 void Dynamics_Init(Point3D* forward, Point3D* up, Point3D* right, 
 		   Point3D* position, GLfloat* velocity)
@@ -12,7 +12,7 @@ void Dynamics_Init(Point3D* forward, Point3D* up, Point3D* right,
   SetVector(50, 50, 50, position);
   
   // Set inital velocity
-  &velocity = 0;
+  *velocity = 0;
 }
 
 void Dynamics_CalcRot(GLfloat yawRate, GLfloat pitchRate, GLfloat rollRate, 
@@ -20,30 +20,30 @@ void Dynamics_CalcRot(GLfloat yawRate, GLfloat pitchRate, GLfloat rollRate,
 {
     GLfloat pitchMat[16], yawMat[16], rollMat[16];
     
-    if(pitch_rate)
+    if(pitchRate)
     {
       // Create matrix to rotate around right-vector
-      ArbRotate(right, pitch_rate, pitchMat);
+      ArbRotate(right, pitchRate, pitchMat);
 		
       // Update forward and right matrix
       MatrixMultPoint3D(pitchMat, forward, forward);
       MatrixMultPoint3D(pitchMat, up, up);
     }
     
-    if(yaw_rate)
+    if(yawRate)
     {
       // Create matrix to rotate around up-vector
-      ArbRotate(up, yaw_rate, yawMat);
+      ArbRotate(up, yawRate, yawMat);
 		
       // Update forward and right matrix
       MatrixMultPoint3D(yawMat, forward,forward);
       MatrixMultPoint3D(yawMat, right, right);
     }
     
-    if(roll_rate)
+    if(rollRate)
     {
       // Create matrix to rotate around forward-vector
-      ArbRotate(forward, roll_rate, rollMat);
+      ArbRotate(forward, rollRate, rollMat);
 		
       // Update forward and right matrix
       MatrixMultPoint3D(rollMat, up, up);
@@ -54,14 +54,14 @@ void Dynamics_CalcRot(GLfloat yawRate, GLfloat pitchRate, GLfloat rollRate,
 void Dynamics_CalcPos(GLfloat thrust, Point3D* forward, GLfloat* velocity, Point3D* position)
 {
   	Point3D movment;
-	&velocity = thrust; // Utveckla denna!
+	*velocity = thrust; // Utveckla denna!
 	// Scale forward vector with velocity
-	ScalarMult(forward, &velocity, &movment);
+	ScalarMult(forward, *velocity, &movment);
 	// Add movment vector to position
-	VectorAdd(&position, &movment, &position);
+	VectorAdd(position, &movment, position);
 }
 
-void Dynamics_CalcMdlMatrix(Point3D* forward, Point3D* up, Point3D* right, GLfloat* mdlMatrix)
+void Dynamics_CalcMdlMatrix(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* mdlMatrix)
 {
   GLfloat Rot[16], Trans[16];
   

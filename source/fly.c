@@ -18,6 +18,61 @@ GLfloat projMatrix[16], camMatrix[16], mdlMatrix[16];
 GLfloat yawRate, pitchRate, rollRate, velocity, thrust;
 Point3D position, forward, up, right;
 
+// Camera variables (needed for world_display, letting them stay for now)
+Point3D camera_position, camera_look;
+
+#include "airplane.h"
+#include "camera.h"
+#include "dynamics.h"
+#include "world.h"
+
+
+//För debugging endast!
+int x_click;
+int y_click;
+
+void mousemove(int x, int y)
+{
+	Point3D position_to_look;
+	Point3D look_up;
+	GLfloat phi_scale = 100;
+	GLfloat theta_scale = 30;
+	GLfloat rot_matrix[16];
+	
+	// Update x and z in camera_look (look around)
+	VectorSub(&camera_look, &camera_position, &position_to_look);
+	Ry((GLfloat)(x-x_click)/phi_scale, rot_matrix);
+	MatrixMultPoint3D(rot_matrix, &position_to_look, &position_to_look);
+	VectorAdd(&camera_position, &position_to_look, &camera_look);
+	
+	// Update y in camera_look (look up and down)
+	look_up.x = 0; look_up.z = 0; look_up.y = (y-y_click)/theta_scale;
+	VectorAdd(&camera_look, &look_up, &camera_look);
+	
+	lookAt(&camera_position,&camera_look,0,1,0,camMatrix);
+	
+	x_click = x;
+	y_click = y;
+}
+
+void mouseclick(int button, int state, int x, int y)
+{
+	x_click = x;
+	y_click = y;
+}
+//____________________________
+
+
+
+
+
+
+
+void collisionDetection(Point3D* position)
+{
+  
+}
+
 void init(void)
 {	
 	dumpInfo();
@@ -29,15 +84,16 @@ void init(void)
 	glEnable(GL_CULL_FACE);
 	printError("GL inits");
 	
+	
 	// Terrain and skybox
-	World_Init();
+	World_Init(&camera_position, &camera_look);
 	
 	// Airplane
-	Dynamics_Init(&forward, &up, &right, &velocity);
-	Airplane_Init();
+	Dynamics_Init(&forward, &up, &right, &position, &velocity);
+	Airplane_Init(&thrust, &yawRate, &pitchRate, &rollRate);
 	
 	// Camera
-	Camera_Init(&forward, &up, &position, velocity, camMatrix);
+	Camera_Init(&forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
 	
 	// Projection
 	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projMatrix);
@@ -46,7 +102,12 @@ void init(void)
 }
 
 void display(void)
-{	
+{
+    // Only Debugging!!!
+    printf("POS: x: %f, y: %f, z: %f    LOOK: x: %f, y: %f, z: %f\n", camera_position.x, camera_position.y, camera_position.z, camera_look.x, camera_look.y, camera_look.z);
+    //--------------------
+    
+    
 	// Get user input
 	Airplane_Keyboard(&thrust, &yawRate, &pitchRate, &rollRate);
 
@@ -55,8 +116,9 @@ void display(void)
 	Dynamics_CalcPos(thrust, &forward, &velocity, &position);
 	Dynamics_CalcMdlMatrix(&forward, &up, &right, &position, mdlMatrix);
 	
+	// Commented for Debugging: Using mouse to look instead
 	// Update camera
-	Camera_Update(&forward, &up, &position, velocity, camMatrix);
+	//Camera_Update(&forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
 
 	printError("pre display");
 
@@ -64,13 +126,13 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	// Draw ground and skybox
-	World_Draw(&camMatrix, &projMatrix, &position);
+	World_Draw(&camera_position, &camera_look, camMatrix, projMatrix, &position);
 	
 	// Check for collision
 	collisionDetection(&position);
 	
 	// Draw airplane
-	Airplane_Draw(&camMatrix, &projMatrix, &mdlMatrix);
+	Airplane_Draw(&forward, &up, &right, &position, camMatrix, projMatrix);
 	
 	printError("display");
 	
@@ -92,8 +154,11 @@ int main(int argc, char **argv)
 	glutDisplayFunc(display);
 	init ();
 	initKeymapManager();
-	glutSpecialFunc(Airplane_specialKeys);
+	//glutSpecialFunc();
 	glutTimerFunc(20, &OnTimer, 0);
+	
+	glutMouseFunc(&mouseclick);
+	glutMotionFunc(&mousemove);
 
 	glutMainLoop();
 	exit(0);
