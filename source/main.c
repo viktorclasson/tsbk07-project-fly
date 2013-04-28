@@ -48,9 +48,9 @@ GLuint sky_program;
 GLuint tree_program;
 
 // Texture
-GLuint tex1, tex2, treetexbark, treetexleaf;
+GLuint tex2, treetexbark, treetexleaf;
 GLuint skytex;
-TextureData ttex; // terrain
+TextureData ttex, terraintex, tex1; // terrain
 
 
 float animation;
@@ -92,7 +92,7 @@ void init(void)
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 600.0, projectionMatrix);
+	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, -0.1, projectionMatrix);
 
 	// Init some variables
 	y_hat.x = 0; y_hat.y = 1; y_hat.z = 0;
@@ -126,14 +126,16 @@ void init(void)
 	
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUniform1i(glGetUniformLocation(program, "tex"), 0); // Texture unit 0
-	LoadTGATextureSimple("textures/grass.tga", &tex1);
+	LoadTGATexture("textures/grass.tga", &tex1);
+	glUniform1i(glGetUniformLocation(program, "terraintexture"), 1); // Texture unit 1
+	LoadTGATexture("textures/fft-terrain.tga", &terraintex);
 	
 	init_objects();
 	
 	// Load terrain data
 	
 	LoadTGATexture("textures/terrain.tga", &ttex);
-	tm = GenerateTerrain(&ttex,&camera_position);
+	tm = GenerateTerrain(&ttex);
 
 	GenerateHeightmap(&Heightmap);
 
@@ -401,6 +403,7 @@ void display(void)
 	sky_cameraMatrix[7] = -0.5;
 	sky_cameraMatrix[11] = 0;
 	
+	/*
 	if((camera_position.x - x_old > 50 ) || (camera_position.x - x_old < -50 ) || (camera_position.z - z_old > 50 ) || (camera_position.z - z_old < -50 ))
 	{
 		tm = GenerateTerrain(&ttex,&camera_position);
@@ -409,7 +412,7 @@ void display(void)
 		printf("x: %f, z: %f \n",x_old,z_old);
 		printf("Heightmap: x: %d, z: %d \n Center: x: %d, z: %d \n",x_heightmap,z_heightmap,x_center,z_center);
 	}
-
+	*/
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
@@ -449,8 +452,15 @@ void display(void)
 	IdentityMatrix(modelView);
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, modelView);
 	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, camMatrix);
+	GLfloat curPos[3];
+	curPos[0] = camera_position.x;
+	curPos[1] = camera_position.y;
+	curPos[2] = camera_position.z;
+	glUniform3fv(glGetUniformLocation(program, "currentPosition"), 1, curPos);
 	
-	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
+	//glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
+	//glBindTexture(GL_TEXTURE_2D, terraintex);
+	//DrawWireframeModel(tm, program, "inPosition", "inNormal", "inTexCoord");
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
 
 	draw_object();

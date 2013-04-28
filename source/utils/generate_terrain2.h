@@ -17,7 +17,7 @@
 // Heightmap, the heightmap is the height of objects that are around the point defined in Heightmap[1-2][513]
 float Heightmap[512][513];
 
-Model* GenerateTerrain(TextureData *tex, Point3D *camera_position);
+Model* GenerateTerrain(TextureData *tex);
 
 void GenerateHeightmap(float *temp);
 

@@ -27,7 +27,7 @@ Point3D camera_position, camera_look;
 #include "world.h"
 
 
-//För debugging endast!
+//Fï¿½r debugging endast!
 int x_click;
 int y_click;
 
@@ -84,10 +84,8 @@ void init(void)
 	glEnable(GL_CULL_FACE);
 	printError("GL inits");
 	
-	
-	// Terrain and skybox
-	World_Init(&camera_position, &camera_look);
-	
+
+
 	// Airplane
 	Dynamics_Init(&forward, &up, &right, &position, &velocity);
 	Airplane_Init(&thrust, &yawRate, &pitchRate, &rollRate);
@@ -95,6 +93,11 @@ void init(void)
 	// Camera
 	Camera_Init(&forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
 	
+	// Terrain and skybox
+	World_Init(&camera_position, &camera_look);
+
+
+
 	// Projection
 	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projMatrix);
 	
@@ -104,7 +107,7 @@ void init(void)
 void display(void)
 {
     // Only Debugging!!!
-    printf("POS: x: %f, y: %f, z: %f    LOOK: x: %f, y: %f, z: %f\n", camera_position.x, camera_position.y, camera_position.z, camera_look.x, camera_look.y, camera_look.z);
+    //printf("POS: x: %f, y: %f, z: %f    LOOK: x: %f, y: %f, z: %f\n", camera_position.x, camera_position.y, camera_position.z, camera_look.x, camera_look.y, camera_look.z);
     //--------------------
     
     
@@ -150,7 +153,7 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize (600, 600);
-	glutCreateWindow ("I belive I can fly");
+	glutCreateWindow ("I believe I can fly");
 	glutDisplayFunc(display);
 	init ();
 	initKeymapManager();
