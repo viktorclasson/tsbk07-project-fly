@@ -24,22 +24,14 @@ Model* GenerateTerrain(TextureData *tex)
 	// Define the size of the terrain and allocate memory
 	int vertexCount = mapvertexsize * mapvertexsize;
 	int triangleCount = (mapvertexsize-1) * (mapvertexsize-1) * 2;
-	int x_current, z_current;
-	// x_current=(int)ceil(current_position->x);
-	// z_current=(int)ceil(current_position->z);
+
 	int n_x,n_z;
 	float x,z;
-	float heightfactor = 7.0;
-	//printf("%d %d \n",tex->width,tex->height);
-	// Defines centralpoint of heightmap
-	//printf("Current: %d %d \n",x_current,z_current);
-	
+
 	GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * (vertexCount+8));
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * (vertexCount+8));
 	GLfloat *texCoordArray = malloc(sizeof(GLfloat) * 2 * (vertexCount+8));
 	GLuint *indexArray = malloc(sizeof(GLuint) * (triangleCount+12)*3);
-	Point3D u;
-	Point3D v;
 	
 	// The highres will be stored first in the arrays
 	for(n_x=0; n_x < mapvertexsize;n_x++)

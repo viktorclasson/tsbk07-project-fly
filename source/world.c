@@ -29,7 +29,13 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   x_old=camera_position->x;
   z_old=camera_position->z;
   //	Infinite frustum
-  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, -0.1, projMatrix);
+  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 10000000000000000.0, projMatrix);
+  // Debug
+  printf("%f %f %f %f \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f \n", 
+	 projMatrix[0],projMatrix[1], projMatrix[2],projMatrix[3], 
+	 projMatrix[4],projMatrix[5], projMatrix[6],projMatrix[7],
+	 projMatrix[8],projMatrix[9], projMatrix[10],projMatrix[11],
+	 projMatrix[12],projMatrix[13], projMatrix[14],projMatrix[15]);
   
   // Sky
   skybox = LoadModelPlus("objects/skybox.obj");
@@ -53,7 +59,7 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
 
   // Is this really needed here? /Fredrik
   // It don't work without it. /Viktor
-  //glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projMatrix"), 1, GL_TRUE, projMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projMatrix"), 1, GL_TRUE, projMatrix);
 
   glUniform1i(glGetUniformLocation(terrain_program, "tex"), 0); // Texture unit 0
   LoadTGATextureSimple("textures/grass.tga", &tex1);
@@ -63,7 +69,7 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   tm = GenerateTerrain(&ttex);
 }
 
-void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix, GLfloat* projMatrix, Point3D* position)
+void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix, Point3D* position)
 {
     GLfloat modelView[16];
 	
@@ -90,8 +96,7 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	glEnable(GL_CULL_FACE);
 	//printf("x: %f, z: %f\n",camera_position.x,camera_position.z);
 	
-	// Terrain program
-	glUseProgram(terrain_program);
+
 
 	// Build matrix
 	
@@ -113,6 +118,9 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 
 	// Create camera matrix
 	//lookAt(&camera_position,&camera_look,0,1,0,camMatrix);
+	
+	// Terrain program
+	glUseProgram(terrain_program);
 	
 	IdentityMatrix(modelView);
 	glUniformMatrix4fv(glGetUniformLocation(terrain_program, "mdlMatrix"), 1, GL_TRUE, modelView);

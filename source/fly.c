@@ -107,7 +107,7 @@ void init(void)
 void display(void)
 {
     // Only Debugging!!!
-    printf("POS: x: %f, y: %f, z: %f    LOOK: x: %f, y: %f, z: %f\n", camera_position.x, camera_position.y, camera_position.z, camera_look.x, camera_look.y, camera_look.z);
+    //printf("POS: x: %f, y: %f, z: %f    LOOK: x: %f, y: %f, z: %f\n", camera_position.x, camera_position.y, camera_position.z, camera_look.x, camera_look.y, camera_look.z);
     //--------------------
     
     
@@ -128,7 +128,7 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	// Draw ground and skybox
-	World_Draw(&camera_position, &camera_look, camMatrix, projMatrix, &position);
+	World_Draw(&camera_position, &camera_look, camMatrix, &position);
 	
 	// Check for collision
 	collisionDetection(&position);
