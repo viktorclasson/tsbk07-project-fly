@@ -12,7 +12,7 @@
 #include <math.h>
 
 // Matrices to send to shaders
-GLfloat projMatrix[16], camMatrix[16], mdlMatrix[16];
+GLfloat camMatrix[16], projMatrix[16]; //projMatrix skall ej användas längre, tas bort när alla beroende funktioner är fixade
 
 // Airplane variables
 GLfloat yawRate, pitchRate, rollRate, velocity, thrust;
@@ -98,7 +98,7 @@ void init(void)
 
 
 
-	// Projection
+	// Projection, skall ej användas längre, tas bort när alla beroende funktioner är fixade
 	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projMatrix);
 	
 	printError("init arrays");	
@@ -134,7 +134,7 @@ void display(void)
 	collisionDetection(&position);
 	
 	// Draw airplane
-	Airplane_Draw(&forward, &up, &right, &position, camMatrix, projMatrix);
+	Airplane_Draw(&forward, &up, &right, &position, camMatrix);
 	
 	printError("display");
 	

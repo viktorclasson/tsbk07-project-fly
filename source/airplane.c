@@ -1,7 +1,7 @@
 #include "airplane.h"
 
 // Shader matrices
-GLfloat mdlMatrix[16], normalMatrix[16];
+GLfloat projMatrix[16], mdlMatrix[16], normalMatrix[16];
 
 // Models
 Model *plane;
@@ -22,6 +22,8 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
   *pitchRate = 0;
   *rollRate = 0;
   
+  // Projection
+  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projMatrix);
 }
 
 void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate)
@@ -30,10 +32,10 @@ void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GL
 }
 
 
-void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* projMatrix)
+void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix)
 {
   // Calculate complete model matrix and normal matrix(camera and projection applied here, no need to calculate for every vertex on GPU)
-  Airplane_CalcMatrices(forward, up, right, position, camMatrix, projMatrix, mdlMatrix, normalMatrix);
+  Airplane_CalcMatrices(forward, up, right, position, camMatrix, mdlMatrix, normalMatrix);
   
   glUseProgram(plane_program);
   
@@ -46,7 +48,7 @@ void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* posit
   
 }
 
-void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* projMatrix, GLfloat* mdlMatrix, GLfloat* normalMatrix)
+void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* mdlMatrix, GLfloat* normalMatrix)
 {
   GLfloat Rot[16], Trans[16], Scale[16];
   
