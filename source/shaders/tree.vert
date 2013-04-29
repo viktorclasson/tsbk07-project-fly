@@ -18,7 +18,7 @@ void main(void)
 {
 	mat3 normalMatrix1 = mat3(mdlMatrix);
 	worldNormal = normalize(normalMatrix1 * inNormal);
-	worldPosition = vec3(mdlMatrix * vec4(inPosition,1.0));
+	worldPosition = inPosition;
 	texCoord = vec2(worldPosition);
 	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(inPosition, 1.0);
 }

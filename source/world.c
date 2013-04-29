@@ -69,7 +69,7 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   tree = LoadModelPlus("objects/tree1.obj");
   bottom_tree = get_bottom(tree);
   printf("%f \n", bottom_tree);
-  tree_program=loadShaders("shaders/tree.vert","shaders/tree.frag");
+  tree_program=loadShadersG("shaders/tree.vert","shaders/tree.frag","shaders/tree.geo");
   glUseProgram(tree_program);
   glUniform1i(glGetUniformLocation(tree_program, "texbark"), 1); // Texture unit 0
   LoadTGATextureSimple("textures/conc.tga", &treetexbark);
@@ -180,5 +180,5 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	clock_gettime(CLOCK_REALTIME, &t4);
 	
 	// Debugging
-	printf("******* \n Looptime: %d ns \n Time of the rest: %d ns \n******** \n",t2.tv_nsec-t1.tv_nsec,t4.tv_nsec-t3.tv_nsec-(t2.tv_nsec-t1.tv_nsec));
+	//printf("******* \n Looptime: %d ns \n Time of the rest: %d ns \n******** \n",t2.tv_nsec-t1.tv_nsec,t4.tv_nsec-t3.tv_nsec-(t2.tv_nsec-t1.tv_nsec));
 }
