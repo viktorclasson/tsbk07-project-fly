@@ -17,7 +17,4 @@ void Dynamics_CalcRot(GLfloat yawRate, GLfloat pitchRate, GLfloat rollRate,
 		 
 void Dynamics_CalcPos(GLfloat thrust, Point3D* forward, GLfloat* velocity, Point3D* position);
 
-void Dynamics_CalcMdlMatrix(Point3D* forward, Point3D* up, Point3D* right, 
-			    Point3D* position, GLfloat* mdlMatrix);
-
 #endif

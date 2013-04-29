@@ -16,7 +16,6 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
   plane = LoadModelPlus("objects/Harrier-GR.1.obj");
   
   plane_program = loadShaders("shaders/airplane.vert","shaders/airplane.frag");
-  glUseProgram(plane_program);
   
   *thrust = 0;
   *yawRate = 0;
@@ -35,6 +34,8 @@ void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* posit
 {
   // Calculate complete model matrix and normal matrix(camera and projection applied here, no need to calculate for every vertex on GPU)
   Airplane_CalcMatrices(forward, up, right, position, camMatrix, projMatrix, mdlMatrix, normalMatrix);
+  
+  glUseProgram(plane_program);
   
   // Upload model and normal matrices
   glUniformMatrix4fv(glGetUniformLocation(plane_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);

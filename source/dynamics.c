@@ -9,7 +9,7 @@ void Dynamics_Init(Point3D* forward, Point3D* up, Point3D* right,
   SetVector(1, 0, 0, right);
   
   // Set start position
-  SetVector(50, 50, 50, position);
+  SetVector(50, 150, 50, position);
   
   // Set inital velocity
   *velocity = 0;
@@ -59,21 +59,4 @@ void Dynamics_CalcPos(GLfloat thrust, Point3D* forward, GLfloat* velocity, Point
 	ScalarMult(forward, *velocity, &movment);
 	// Add movment vector to position
 	VectorAdd(position, &movment, position);
-}
-
-void Dynamics_CalcMdlMatrix(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* mdlMatrix)
-{
-  GLfloat Rot[16], Trans[16];
-  
-  // Put airplane base vectors into rotation matrix, COLUMN WISE!!!
-  Rot[0] = right->x ; Rot[1] = up->x; Rot[2] = forward->x; Rot[3] = 0;
-  Rot[4] = right->y ; Rot[5] = up->y; Rot[6] = forward->y; Rot[7] = 0;
-  Rot[8] = right->z ; Rot[9] = up->z; Rot[10] = forward->z; Rot[11] = 0;
-  Rot[12] = 0 ; Rot[13] = 0; Rot[14] = 0; Rot[15] = 1;
-  
-  // Make a translation matrix
-  T(position->x, position->y, position->z, Trans);
-  
-  // Put them together
-  Mult(Rot, Trans, mdlMatrix); 
 }

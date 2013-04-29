@@ -53,7 +53,7 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
 
   // Is this really needed here? /Fredrik
   // It don't work without it. /Viktor
-  glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projMatrix"), 1, GL_TRUE, projMatrix);
+  //glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projMatrix"), 1, GL_TRUE, projMatrix);
 
   glUniform1i(glGetUniformLocation(terrain_program, "tex"), 0); // Texture unit 0
   LoadTGATextureSimple("textures/grass.tga", &tex1);
