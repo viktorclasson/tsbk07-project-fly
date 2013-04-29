@@ -17,8 +17,6 @@ void main(void)
 
   diffuselight = max(dot(worldNormal,light_pos),0);
   outColor = outColor + vec4(diffuselight*vec3(1.0, 1.0, 1.0),1.0);
-  if (worldPosition.y > 1)
-  outColor = outColor*texture(texbark, texCoord) + vec4(0.2, 0.2, 0.2, 1.0);
-  else
-  outColor = outColor*texture(texbark, texCoord)*vec4(0.3,0.3,1.5,1.0) + vec4(0.2, 0.2, 0.2, 1.0);
+
+  outColor = outColor*texture(texbark, texCoord)*vec4(1.5, 0.8, 0.4, 1.0) + vec4(0.2, 0.2, 0.2, 1.0);
 }

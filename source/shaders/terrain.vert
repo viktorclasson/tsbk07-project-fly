@@ -17,19 +17,29 @@ uniform vec3 currentPosition;
 
 void main(void)
 {
-	mat3 normalMatrix1 = mat3(mdlMatrix);
-	worldNormal = normalize(normalMatrix1 * inNormal);
-	
 	// Generate terrain
-	vec3 test_position = inPosition;
-	test_position.x=inPosition.x + currentPosition.x;
-	test_position.z=inPosition.z + currentPosition.z;
-	test_position.y = abs((sin(test_position.x/600)*sin(test_position.z/400)*100));
+	vec3 real_position = inPosition;
+	real_position.x=inPosition.x + currentPosition.x;
+	real_position.z=inPosition.z + currentPosition.z;
+	real_position.y = abs((sin(real_position.x/600)*sin(real_position.z/400)*100));
+
+	// Calculate normals
+	mat3 normalMatrix1 = mat3(mdlMatrix);
+	vec3 u = real_position;
+	u.z = u.z + 0.1;
+	u.y = abs((sin(u.x/600)*sin(u.z/400)*100));
+	u=normalize(u-real_position);
+	vec3 v = real_position;
+	v.x = v.x + 0.1;
+	v.y = abs((sin(v.x/600)*sin(v.z/400)*100));
+	v=normalize(v-real_position);
+	vec3 calcNormal = cross(u,v);
+	worldNormal = normalize(normalMatrix1 * calcNormal);
 
 	
 	
-	worldPosition = vec3(mdlMatrix * vec4(test_position,1.0));
+	worldPosition = vec3(mdlMatrix * vec4(real_position,1.0));
 	texCoord = inTexCoord;
-	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(test_position, 1.0);
+	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(real_position, 1.0);
 }
 
