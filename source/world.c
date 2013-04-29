@@ -1,12 +1,12 @@
 #include "world.h"
 
 // Models
-Model *terrain, *skybox, *tm;
+Model *terrain, *skybox, *tm, *tree;
 
 // Textures
-GLuint tex1, tex2, treetexleaf;
+GLuint tex1, tex2, treetexleaf, treetexbark;
 GLuint skytex;
-TextureData ttex, treetexbark; // terrain
+TextureData ttex; // terrain
 
 // Shader programs
 GLuint sky_program, tree_program, terrain_program;
@@ -15,7 +15,7 @@ GLuint sky_program, tree_program, terrain_program;
 GLfloat x_old,z_old;
 
 // Projection matrix, not sure why it doesn't work without it...
-GLfloat projMatrix[16];
+GLfloat worldprojMatrix[16];
 
 // For debugging, should be inside return_height
 int x_heightmap;
@@ -23,32 +23,52 @@ int z_heightmap;
 int x_center;
 int z_center;
 
+float bottom_tree;
+
+// Returns the bottom of a model.
+float get_bottom(Model *m)
+{
+	int i;
+	float miny = 1e10;
+	printf("numVertices: %d \n",m->numVertices);
+	for (i = 0; i < m->numVertices; i++)
+	{
+		if (m->vertexArray[3 * i+1] < miny) miny = m->vertexArray[3 * i+1];
+	}
+
+	return miny;
+}
+
 void World_Init(Point3D* camera_position, Point3D* camera_look)
 {
   // Init some variables
   x_old=camera_position->x;
   z_old=camera_position->z;
   //	Infinite frustum
-  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 10000000000000000.0, projMatrix);
+  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 10000000000000000.0, worldprojMatrix);
   // Debug
   printf("%f %f %f %f \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f \n", 
-	 projMatrix[0],projMatrix[1], projMatrix[2],projMatrix[3], 
-	 projMatrix[4],projMatrix[5], projMatrix[6],projMatrix[7],
-	 projMatrix[8],projMatrix[9], projMatrix[10],projMatrix[11],
-	 projMatrix[12],projMatrix[13], projMatrix[14],projMatrix[15]);
+	 worldprojMatrix[0],worldprojMatrix[1], worldprojMatrix[2],worldprojMatrix[3], 
+	 worldprojMatrix[4],worldprojMatrix[5], worldprojMatrix[6],worldprojMatrix[7],
+	 worldprojMatrix[8],worldprojMatrix[9], worldprojMatrix[10],worldprojMatrix[11],
+	 worldprojMatrix[12],worldprojMatrix[13], worldprojMatrix[14],worldprojMatrix[15]);
+	 
   
   // Sky
   skybox = LoadModelPlus("objects/skybox.obj");
   sky_program = loadShaders("shaders/skybox.vert","shaders/skybox.frag");
   glUseProgram(sky_program);
   LoadTGATextureSimple("textures/SkyBox512.tga", &skytex);
-  glUniformMatrix4fv(glGetUniformLocation(sky_program, "projMatrix"), 1, GL_TRUE, projMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(sky_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
   
   // Trees
+  tree = LoadModelPlus("objects/tree1.obj");
+  bottom_tree = get_bottom(tree);
+  printf("%f \n", bottom_tree);
   tree_program=loadShaders("shaders/tree.vert","shaders/tree.frag");
   glUseProgram(tree_program);
   glUniform1i(glGetUniformLocation(tree_program, "texbark"), 1); // Texture unit 0
-  LoadTGATexture("textures/conc.tga", &treetexbark);
+  LoadTGATextureSimple("textures/conc.tga", &treetexbark);
   //glUniform1i(glGetUniformLocation(tree_program, "texleaf"), 2); // Texture unit 1
   //LoadTGATextureSimple("objects/tree 1a - 1b/leafs1.tga", &treetexleaf);
   
@@ -59,7 +79,7 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
 
   // Is this really needed here? /Fredrik
   // It don't work without it. /Viktor
-  glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projMatrix"), 1, GL_TRUE, projMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
 
   glUniform1i(glGetUniformLocation(terrain_program, "tex"), 0); // Texture unit 0
   LoadTGATextureSimple("textures/grass.tga", &tex1);
@@ -67,6 +87,12 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   // Load terrain data
   LoadTGATexture("textures/terrain.tga", &ttex);
   tm = GenerateTerrain(&ttex);
+}
+
+GLfloat World_GetHeight(GLfloat x, GLfloat z)
+{
+    GLfloat y = abs((sin(x/600)*sin(z/400)*100));
+    return y;
 }
 
 void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix, Point3D* position)
@@ -96,28 +122,39 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	glEnable(GL_CULL_FACE);
 	//printf("x: %f, z: %f\n",camera_position.x,camera_position.z);
 	
-
-
-	// Build matrix
+	// Tree program
+	// 	Inits
+	glUseProgram(tree_program);
+	GLfloat tree_mtwMatrix[16];
+	GLfloat tree_scaleMatrix[16];
+	GLfloat tree_placeMatrix[16];
+	Point3D tree_position;
 	
-	//Point3D camera_position = {0, 5, 8};
-	//Point3D camera_look = {2, 0, 2};
+	tree_position.y=bottom_tree;
+	tree_position.x=0.0; 
+	tree_position.z=0.0;
+	T(0.0,0.0,0.0,tree_mtwMatrix);
+	MatrixMultPoint3D(tree_mtwMatrix,&tree_position,&tree_position);
+	//T(0.0,World_GetHeight(tree_position.x,tree_position.z),0.0,tree_placeMatrix);
+	//Mult(tree_placeMatrix,tree_mtwMatrix,tree_mtwMatrix);
+	S(50.0,50.0,50.0,tree_scaleMatrix);
+	Mult(tree_scaleMatrix,tree_mtwMatrix,tree_mtwMatrix);
 
+	//printf("ycoord %f, Position %f %f \n",ycoord,position.x, position.z);
 	
-	/*
-	//Har kommenterat bort allt som har med kamera att g�ra s� f�r vi s�tta tillbaka den funktionaliteten steg f�r steg sen
-	if(camera_position->y - 5 < calc_object_ycoord(camera_position->x, camera_position.z))
-	{
-	  camera_position.y = calc_object_ycoord(camera_position.x, camera_position.z) + 5;
-	}
-	*/
+	glBindTexture(GL_TEXTURE_2D, treetexbark);
+	glUniform1i(glGetUniformLocation(tree_program, "texbark"), 0);
 	
-	//tm = GenerateTerrain(&ttex,&camera_position);
-
-	//GenerateHeightmap(&Heightmap);
-
-	// Create camera matrix
-	//lookAt(&camera_position,&camera_look,0,1,0,camMatrix);
+	// Upload projection matrix
+	glUniformMatrix4fv(glGetUniformLocation(tree_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
+	
+	// Upload camera matrix
+	glUniformMatrix4fv(glGetUniformLocation(tree_program, "camMatrix"), 1, GL_TRUE, camMatrix);
+	
+	// Upload model to world matrix and draw objects
+  	glUniformMatrix4fv(glGetUniformLocation(tree_program, "mdlMatrix"), 1, GL_TRUE, tree_mtwMatrix);
+	
+	DrawModel(tree, tree_program, "inPosition", "inNormal", "texCoord");
 	
 	// Terrain program
 	glUseProgram(terrain_program);
@@ -130,8 +167,4 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	DrawModel(tm, terrain_program, "inPosition", "inNormal", "inTexCoord");
 }
 
-GLfloat World_GetHeight(GLfloat x, GLfloat z)
-{
-    GLfloat y = 0;
-    return y;
-}
+
