@@ -9,9 +9,9 @@
 
 #include "utils/VectorUtils2.h"
 
-void Camera_Init(Point3D* forward, Point3D* up, Point3D* position, 
+void Camera_Init(GLuint firstPersonView, Point3D* forward, Point3D* up, Point3D* position, 
 		 GLfloat velocity, Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix);
-void Camera_Update(Point3D* forward, Point3D* up, Point3D* position, 
+void Camera_Update(GLuint firstPersonView, Point3D* forward, Point3D* up, Point3D* position, 
 		 GLfloat velocity, Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix);
 
 #endif

@@ -14,6 +14,9 @@
 // Matrices to send to shaders
 GLfloat camMatrix[16], projMatrix[16]; //projMatrix skall ej användas längre, tas bort när alla beroende funktioner är fixade
 
+// Camera settings; first or third person view
+GLuint firstPersonView;
+
 // Airplane variables
 GLfloat yawRate, pitchRate, rollRate, velocity, thrust;
 Point3D position, forward, up, right;
@@ -130,11 +133,11 @@ void init(void)
 
 	// Airplane
 	Dynamics_Init(&forward, &up, &right, &position, &velocity);
-	Airplane_Init(&thrust, &yawRate, &pitchRate, &rollRate);
+	Airplane_Init(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView);
 	Airplane_FindEdges(&front, &back, &leftWing, &rightWing, &top, &bottom);
 	
 	// Camera
-	Camera_Init(&forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
+	Camera_Init(firstPersonView, &forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
 	
 	// Terrain and skybox
 	World_Init(&camera_position, &camera_look);
@@ -154,7 +157,7 @@ void display(void)
     
     
 	// Get user input
-	Airplane_Keyboard(&thrust, &yawRate, &pitchRate, &rollRate);
+	Airplane_Keyboard(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView);
 
 	// Update airplane dynamics
 	Dynamics_CalcRot(yawRate, pitchRate, rollRate, &forward, &up, &right);
@@ -162,7 +165,7 @@ void display(void)
 	
 	// Commented for Debugging: Using mouse to look instead
 	// Update camera
-	Camera_Update(&forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
+	Camera_Update(firstPersonView, &forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
 
 	printError("pre display");
 

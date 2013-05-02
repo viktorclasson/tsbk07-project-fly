@@ -17,7 +17,7 @@ GLfloat initialRotY = -3.14159265358979323846/2;
 // Shaders
 GLuint plane_program;
 
-void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate)
+void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView)
 {
   plane = LoadModelPlus("objects/Harrier-GR.1.obj");
   
@@ -27,12 +27,13 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
   *yawRate = 0;
   *pitchRate = 0;
   *rollRate = 0;
+  *firstPersonView = 0;
   
   // Projection
   frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projMatrix);
 }
 
-void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate)
+void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView)
 {
   GLfloat pitchModifier = 0.01;
   GLfloat rollModifier = 0.01;
@@ -84,6 +85,15 @@ void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GL
   else if(keyIsDown('v')) //decrease thust
   {
     *thrust = *thrust - thrustModifier;
+  }
+  
+  if(keyIsDown('1')) //set first person view
+  {
+    *firstPersonView = 1;
+  }
+  else if(keyIsDown('3')) //set third person view
+  {
+    *firstPersonView = 0;
   }
   
   if(keyIsDown('r')) //decrease thust
