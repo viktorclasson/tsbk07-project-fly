@@ -78,21 +78,3 @@ void Game_Over(void)
 {
  // Do something 
 }
-
-void Game_DrawBullseye(void)
-{
-  
-}
-
-float[] GenerateCircle(void)
-{
-  
-  float[] 
-  int circlePoints = 20;
-  int i;
-  for(i = 0; i < circlePoints; i++)
-  {
-    
-  }
-  
-}
