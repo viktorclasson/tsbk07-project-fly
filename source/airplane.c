@@ -9,6 +9,9 @@ Model *plane;
 // Scale factor for airplane model
 GLfloat scaleFactor = 0.5;
 
+// Initial rotation for airplane model
+GLfloat initialRotY = 3.14159265358979323846/2;
+
 // Textures
 
 // Shaders
@@ -111,23 +114,27 @@ void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* posit
 
 void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* mdlMatrix, GLfloat* normalMatrix)
 {
-  GLfloat Rot[16], Trans[16], Scale[16];
+  GLfloat rotMatrix[16], transMatrix[16], scaleMatrix[16], initialRotMatrix[16];
   
   // Make a scaling matrix
-  S(scaleFactor, scaleFactor, scaleFactor, Scale);
+  S(scaleFactor, scaleFactor, scaleFactor, scaleMatrix);
+  
+  // Create initial rotation matrix
+  Ry(initialRotY, initialRotMatrix);
   
   // Put airplane base vectors into rotation matrix, COLUMN WISE!!!
-  Rot[0] = right->x ; Rot[1] = up->x; Rot[2] = forward->x; Rot[3] = 0;
-  Rot[4] = right->y ; Rot[5] = up->y; Rot[6] = forward->y; Rot[7] = 0;
-  Rot[8] = right->z ; Rot[9] = up->z; Rot[10] = forward->z; Rot[11] = 0;
-  Rot[12] = 0 ; Rot[13] = 0; Rot[14] = 0; Rot[15] = 1;
+  rotMatrix[0] = right->x ; rotMatrix[1] = up->x; rotMatrix[2] = forward->x; rotMatrix[3] = 0;
+  rotMatrix[4] = right->y ; rotMatrix[5] = up->y; rotMatrix[6] = forward->y; rotMatrix[7] = 0;
+  rotMatrix[8] = right->z ; rotMatrix[9] = up->z; rotMatrix[10] = forward->z; rotMatrix[11] = 0;
+  rotMatrix[12] = 0 ; rotMatrix[13] = 0; rotMatrix[14] = 0; rotMatrix[15] = 1;
   
   // Make a translation matrix
-  T(position->x, position->y, position->z, Trans);
+  T(position->x, position->y, position->z, transMatrix);
   
   // Put them together to the model matrix, and apply model-to-view matrix
-  Mult(Rot, Scale, mdlMatrix); 
-  Mult(Trans, mdlMatrix, mdlMatrix);
+  Mult(initialRotMatrix, scaleMatrix, mdlMatrix); 
+  Mult(rotMatrix, mdlMatrix, mdlMatrix); 
+  Mult(transMatrix, mdlMatrix, mdlMatrix);
   Mult(camMatrix, mdlMatrix, mdlMatrix);
   
   // Extract the normal matrix from the model matrix
