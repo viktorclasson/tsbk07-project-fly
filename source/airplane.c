@@ -27,6 +27,7 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
   glUseProgram(plane_program);
   LoadTGATextureSimple("textures/harrier.tga", &planeTex);
   
+  
   *thrust = 0;
   *yawRate = 0;
   *pitchRate = 0;
@@ -122,8 +123,9 @@ void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* posit
   glUniformMatrix3fv(glGetUniformLocation(plane_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
   
   // Upload textures
-  glBindTexture(GL_TEXTURE_2D, planeTex);
   glUniform1i(glGetUniformLocation(plane_program, "texUnit"), 0); // Texture unit 1
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, planeTex);
   
   // Draw the plane
   DrawModel(plane, plane_program, "inPosition", "inNormal", "inTexCoord");

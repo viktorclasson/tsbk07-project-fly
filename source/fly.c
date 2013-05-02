@@ -12,7 +12,7 @@
 #include <math.h>
 
 // Matrices to send to shaders
-GLfloat camMatrix[16], projMatrix[16]; //projMatrix skall ej anv‰ndas l‰ngre, tas bort n‰r alla beroende funktioner ‰r fixade
+GLfloat camMatrix[16], projMatrix[16]; //projMatrix skall ej anv√§ndas l√§ngre, tas bort n√§r alla beroende funktioner √§r fixade
 
 // Camera settings; first or third person view
 GLuint firstPersonView;
@@ -30,7 +30,7 @@ Point3D camera_position, camera_look;
 #include "world.h"
 #include "game.h"
 
-//FÔøΩr debugging endast!
+//F√Ø¬ø≈ìr debugging endast!
 int x_click;
 int y_click;
 
@@ -89,7 +89,7 @@ void init(void)
 	// Init game
 	Game_Init();
 	
-	// Projection, skall ej anv‰ndas l‰ngre, tas bort n‰r alla beroende funktioner ‰r fixade
+	// Projection, skall ej anv√§ndas l√§ngre, tas bort n√§r alla beroende funktioner √§r fixade
 	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projMatrix);
 	
 	printError("init arrays");	
@@ -124,7 +124,7 @@ void display(void)
 	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	  
 	  // Draw ground and skybox
-	  World_Draw(&camera_position, &camera_look, camMatrix, &position, &up, &right, &forward);
+	  World_Draw(&camera_position, &camera_look, camMatrix, &position, &up, firstPersonView);
 	  
 	  // Check for collision
 	  Game_CollisionDetection(&position, &forward, &up, &right);

@@ -5,6 +5,7 @@ in vec2 texCoord;
 in vec3 worldNormal;
 in vec3 worldPosition;
 uniform sampler2D tex;
+uniform sampler2D skybox_tex;
 
 vec3 light_pos = vec3(0.58, 0.58, 0.58);
 
@@ -18,6 +19,8 @@ void main(void)
   outColor = outColor + vec4(diffuselight*vec3(1.0, 1.0, 1.0),1.0);
   if (worldPosition.y > 1)
   outColor = outColor*texture(tex, texCoord) + vec4(0.2, 0.2, 0.2, 1.0);
-  else
-  outColor = outColor*texture(tex, texCoord)*vec4(0.3,0.3,1.5,1.0) + vec4(0.2, 0.2, 0.2, 1.0);
+  if (worldPosition.y > 50)
+  outColor = outColor*texture(tex, texCoord)*vec4(0.8,0.6,1.4,1.0) + vec4(0.2, 0.2, 0.2, 1.0);
+  if (worldPosition.y < 1)
+  outColor = outColor*texture(tex, texCoord)*vec4(0.5,0.5,0.5,1.0)+ vec4(0.15,0.15,0.8,1.0) + vec4(0.2, 0.2, 0.2, 1.0);
 }
