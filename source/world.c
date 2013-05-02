@@ -69,7 +69,7 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   tree = LoadModelPlus("objects/tree1.obj");
   bottom_tree = get_bottom(tree);
   printf("%f \n", bottom_tree);
-  tree_program=loadShadersG("shaders/tree.vert","shaders/tree.frag","shaders/tree.geo");
+  tree_program=loadShaders("shaders/tree.vert","shaders/tree.frag");//,"shaders/tree.geo");
   glUseProgram(tree_program);
   glUniform1i(glGetUniformLocation(tree_program, "texbark"), 1); // Texture unit 0
   LoadTGATextureSimple("textures/conc.tga", &treetexbark);
@@ -95,7 +95,9 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
 
 GLfloat World_GetHeight(GLfloat x, GLfloat z)
 {
-    GLfloat y = abs((sin(x/600)*sin(z/400)*100));
+	// Insert random function here (which is the same random function as in the shader)
+    // GLfloat y = abs((sin(x/600)*sin(z/400)*100));
+	GLfloat y = abs((sin(x/600)*sin(z/400)*100)+(5.0*sin(z/100.0-0.5)*2.0*sin(x/40.0)))-1.5;
     return y;
 }
 
@@ -103,6 +105,7 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 {
 	// For time debugging
 	struct timespec t1,t2,t3,t4;
+	// For time critical debugging
 	clock_gettime(CLOCK_REALTIME, &t3);
   
 	GLfloat modelView[16];
@@ -148,24 +151,38 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         glUniformMatrix4fv(glGetUniformLocation(tree_program, "camMatrix"), 1, GL_TRUE, camMatrix);
 		
 	// 	Drawing/placing loop
+        // For time critical debugging
 	clock_gettime(CLOCK_REALTIME, &t1);
 	int i;
 	S(50.0,50.0,50.0,tree_scaleMatrix);
+	int mult_factor_x = (int)floor(camera_position->x/2000.0);
+	int mult_factor_z = (int)floor(camera_position->z/2000.0);
 	for(i=100;i>0;i=i-1)
 	{
-	  tree_position.y=bottom_tree;
-	  tree_position.x=0.0;
-	  tree_position.z=0.0;
-	  T(2000.0*sin((float)i/100.0-0.5),0.0,1000.0*sin((float)i),tree_mtwMatrix);
-	  MatrixMultPoint3D(tree_mtwMatrix,&tree_position,&tree_position);
-	  T(0.0,World_GetHeight(tree_position.x,tree_position.z),0.0,tree_placeMatrix);
-	  Mult(tree_placeMatrix,tree_mtwMatrix,tree_mtwMatrix);
-	  Mult(tree_mtwMatrix,tree_scaleMatrix,tree_mtwMatrix);
-	  // Upload model to world matrix and draw objects
-	  glUniformMatrix4fv(glGetUniformLocation(tree_program, "mdlMatrix"), 1, GL_TRUE, tree_mtwMatrix);
-	
-	  DrawModel(tree, tree_program, "inPosition", "inNormal", "texCoord");
+
+	  tree_position.x=2000.0*sin((float)i/100.0-0.5);
+	  if(tree_position.x > camera_position->x+1000 || tree_position.x < camera_position->x-1000)
+	  {
+		  tree_position.x = tree_position.x+2000.0*mult_factor_x;
+	  }
+	  tree_position.z=1000.0*sin((float)i);
+	  if(tree_position.z > camera_position->z+1000 || tree_position.z < camera_position->z-1000)
+	  {
+		  tree_position.z = tree_position.z+2000.0*mult_factor_z;
+	  }
+	  tree_position.y=bottom_tree+World_GetHeight(tree_position.x,tree_position.z);
+	  // Draw only if above water level
+	  if(tree_position.y > 1)
+	  {
+		  T(tree_position.x,tree_position.y,tree_position.z,tree_mtwMatrix);
+		  Mult(tree_mtwMatrix,tree_scaleMatrix,tree_mtwMatrix);
+		  // Upload model to world matrix and draw objects
+		  glUniformMatrix4fv(glGetUniformLocation(tree_program, "mdlMatrix"), 1, GL_TRUE, tree_mtwMatrix);
+
+		  DrawModel(tree, tree_program, "inPosition", "inNormal", "texCoord");
+	  }
 	}
+	// For time critical debugging
 	clock_gettime(CLOCK_REALTIME, &t2);
 
         // Terrain program
@@ -177,6 +194,7 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
        
         glBindTexture(GL_TEXTURE_2D, tex1);             // Bind Our Texture tex1
         DrawModel(tm, terrain_program, "inPosition", "inNormal", "inTexCoord");
+        // For time critical debugging
 	clock_gettime(CLOCK_REALTIME, &t4);
 	
 	// Debugging

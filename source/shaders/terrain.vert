@@ -21,17 +21,18 @@ void main(void)
 	vec3 real_position = inPosition;
 	real_position.x=inPosition.x + currentPosition.x;
 	real_position.z=inPosition.z + currentPosition.z;
-	real_position.y = abs((sin(real_position.x/600)*sin(real_position.z/400)*100));
+	real_position.y = abs((sin(real_position.x/600)*sin(real_position.z/400)*100)+(5.0*sin(real_position.z/100.0-0.5)*2.0*sin(real_position.x/40.0)))-1.5;
 
 	// Calculate normals
 	mat3 normalMatrix1 = mat3(mdlMatrix);
 	vec3 u = real_position;
 	u.z = u.z + 0.1;
-	u.y = abs((sin(u.x/600)*sin(u.z/400)*100));
+	// u.y = abs((sin(u.x/600)*sin(u.z/400)*100));
+	u.y = abs((sin(u.x/600)*sin(u.z/400)*100)+(5.0*sin(u.z/100.0-0.5)*2.0*sin(u.x/40.0)))-1.5;
 	u=normalize(u-real_position);
 	vec3 v = real_position;
 	v.x = v.x + 0.1;
-	v.y = abs((sin(v.x/600)*sin(v.z/400)*100));
+	v.y = abs((sin(v.x/600)*sin(v.z/400)*100)+(5.0*sin(v.z/100.0-0.5)*2.0*sin(v.x/40.0)))-1.5;
 	v=normalize(v-real_position);
 	vec3 calcNormal = cross(u,v);
 	worldNormal = normalize(normalMatrix1 * calcNormal);
