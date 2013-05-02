@@ -5,8 +5,8 @@ void Dynamics_Init(Point3D* forward, Point3D* up, Point3D* right,
 {
   // Set inital airplane coordinat system
   SetVector(0, 1, 0, up);
-  SetVector(1, 0, 0, forward);	
-  SetVector(0, 0, 1, right);
+  SetVector(0, 0, 1, forward);	
+  SetVector(1, 0, 0, right);
   
   // Set start position
   SetVector(50, 150, 50, position);
