@@ -116,17 +116,23 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         GLfloat sky_cameraMatrix[16];
         GLfloat sky_mdlMatrix[16];
         T(camera_position->x,camera_position->y,camera_position->z,sky_mdlMatrix);
-        lookAt(camera_position,camera_look,0,1,0,sky_cameraMatrix);
-        sky_cameraMatrix[3] = 0;
-        sky_cameraMatrix[7] = -0.5;
-        sky_cameraMatrix[11] = 0;
+	//plane_up->x=0;
+	//plane_up->y=1;
+	//plane_up->z=0;
+        lookAt(camera_position,camera_look,plane_up->x,plane_up->y,plane_up->z,sky_cameraMatrix);
+        sky_cameraMatrix[3] = -0.5*plane_up->x;
+        sky_cameraMatrix[7] = -0.5*plane_up->y;
+        sky_cameraMatrix[11] = -0.5*plane_up->z;
 	
+	// Not necessary
+	/*
 	GLfloat Rot[16];
 	Rot[0] = plane_right->x ; Rot[1] = plane_up->x; Rot[2] = plane_forward->x; Rot[3] = 0;
 	Rot[4] = plane_right->y ; Rot[5] = plane_up->y; Rot[6] = plane_forward->y; Rot[7] = 0;
 	Rot[8] = plane_right->z ; Rot[9] = plane_up->z; Rot[10] = plane_forward->z; Rot[11] = 0;
 	Rot[12] = 0 ; Rot[13] = 0; Rot[14] = 0; Rot[15] = 1;
 	Transpose(Rot,Rot);
+	*/
 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
@@ -134,7 +140,7 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         glBindTexture(GL_TEXTURE_2D, skytex);
         glUniform1i(glGetUniformLocation(sky_program, "texUnit"), 0); // Texture unit 1
         glUniformMatrix4fv(glGetUniformLocation(sky_program, "camMatrix"), 1, GL_TRUE, sky_cameraMatrix);
-        glUniformMatrix4fv(glGetUniformLocation(sky_program, "mdlMatrix"), 1, GL_TRUE, Rot);
+	glUniformMatrix4fv(glGetUniformLocation(sky_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
         DrawModel(skybox, sky_program, "in_Position", "in_Normal", "inTexCoord");
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -162,32 +168,60 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	clock_gettime(CLOCK_REALTIME, &t1);
 	int i;
 	S(50.0,50.0,50.0,tree_scaleMatrix);
-	int mult_factor_x = (int)(camera_position->x/2000.0);
-	int mult_factor_z = (int)(camera_position->z/2000.0);
-	for(i=100;i>0;i=i-1)
+	float constant_factor = 1000.0;
+	//int mult_factor_x = (int)(camera_position->x/(2.0*constant_factor));
+	//int mult_factor_z = (int)(camera_position->z/(2.0*constant_factor));
+	int mult_factor_x = (int)(camera_position->x/1000.0);
+	int mult_factor_z = (int)(camera_position->z/1000.0);
+	Point3D testtt;
+	for(i=1;i>0;i=i-1)
 	{
-
-	  tree_position.x=2000.0*sin((float)i/100.0-0.5);
-	  if(tree_position.x > camera_position->x+1000 || tree_position.x < camera_position->x-1000)
+	  /*
+	  tree_position.x=2.0*constant_factor*sin((float)i/100.0-0.5);
+	  if(tree_position.x > camera_position->x+constant_factor || tree_position.x < camera_position->x-constant_factor)
 	  {
-		  tree_position.x = tree_position.x+2000.0*mult_factor_x;
+		  tree_position.x = tree_position.x+constant_factor*mult_factor_x;
 	  }
-	  tree_position.z=1000.0*sin((float)i);
-	  if(tree_position.z > camera_position->z+1000 || tree_position.z < camera_position->z-1000)
+	  tree_position.z=constant_factor*sin((float)i);
+	  if(tree_position.z > camera_position->z+constant_factor || tree_position.z < camera_position->z-constant_factor)
 	  {
-		  tree_position.z = tree_position.z+2000.0*mult_factor_z;
+		  tree_position.z = tree_position.z+constant_factor*mult_factor_z;
 	  }
+	  */
+	  tree_position.x=0;
+	  tree_position.z=0;
+	  
+	  MatrixMultPoint3D(camMatrix, &tree_position, &testtt);
+	  if(testtt.z > 0)
+	  {
+	    //tree_position.x=tree_position.x+300;
+	    tree_position.z=tree_position.z+500;
+	  }
+	  if(testtt.x > 0)
+	  {
+	    //tree_position.x=tree_position.x+300;
+	    tree_position.x=tree_position.x+500;
+	  }
+	  
+	  
+	  
 	  tree_position.y=bottom_tree+World_GetHeight(tree_position.x,tree_position.z);
+
 	  // Draw only if above water level
-	  if(tree_position.y > 1)
-	  {
+	  //if(tree_position.y > 1)
+	  //{
+		  printf("******\nTree x: %f, z: %f \n",tree_position.x,tree_position.z);
+		  printf("Multfactor x: %d, z: %d \n",mult_factor_x,mult_factor_z);
+		  printf("Camera x: %f, z: %f\n",camera_position->x,camera_position->z);
 		  T(tree_position.x,tree_position.y,tree_position.z,tree_mtwMatrix);
 		  Mult(tree_mtwMatrix,tree_scaleMatrix,tree_mtwMatrix);
 		  // Upload model to world matrix and draw objects
 		  glUniformMatrix4fv(glGetUniformLocation(tree_program, "mdlMatrix"), 1, GL_TRUE, tree_mtwMatrix);
+		  
+		  printf("Multiplication x: %f,y: %f, z: %f \n*******\n",testtt.x,testtt.y,testtt.z);
 
 		  DrawModel(tree, tree_program, "inPosition", "inNormal", "texCoord");
-	  }
+	  //}
 	}
 	// For time critical debugging
 	clock_gettime(CLOCK_REALTIME, &t2);
