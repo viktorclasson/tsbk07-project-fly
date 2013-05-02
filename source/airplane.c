@@ -31,36 +31,50 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
 
 void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate)
 {
-  GLfloat pitchModifier = 0.001;
-  GLfloat rollModifier = 0.001;
-  GLfloat yawModifier = 0.001;
-  GLfloat thrustModifier = 0.01;
+  GLfloat pitchModifier = 0.01;
+  GLfloat rollModifier = 0.01;
+  GLfloat yawModifier = 0.01;
+  GLfloat thrustModifier = 0.05;
   
   if(keyIsDown('w')) // pitch up
   {
-    *pitchRate = *pitchRate + pitchModifier;
+    *pitchRate = pitchModifier;
   }
   else if (keyIsDown('s')) //pitch down
   {
-    *pitchRate = *pitchRate - pitchModifier;
+    *pitchRate = -1 * pitchModifier;
   }
-  else if (keyIsDown('a')) //roll left
+  else
   {
-    *rollRate = *rollRate - rollModifier;
+    *pitchRate = 0;
+  }
+  
+  if (keyIsDown('a')) //roll left
+  {
+    *rollRate = -1 * rollModifier;
   }
   else if(keyIsDown('d')) //roll right
   {
-    *rollRate = *rollRate + rollModifier;
+    *rollRate = rollModifier;
   }
-  else if (keyIsDown('q')) //bank left
+  else
   {
-    *yawRate = *yawRate + yawModifier;
+    *rollRate = 0;
+  }
+  if (keyIsDown('q')) //bank left
+  {
+    *yawRate = yawModifier;
   }
   else if(keyIsDown('e')) //bank right
   {
-    *yawRate = *yawRate - yawModifier;
+    *yawRate = -1 * yawModifier;
   }
-  else if (keyIsDown(' ')) //increase thrust
+  else
+  {
+    *yawRate = 0;
+  }
+  
+  if (keyIsDown(' ')) //increase thrust
   {
     *thrust = *thrust + thrustModifier;
   }
@@ -68,7 +82,8 @@ void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GL
   {
     *thrust = *thrust - thrustModifier;
   }
-  else if(keyIsDown('r')) //decrease thust
+  
+  if(keyIsDown('r')) //decrease thust
   {
     *pitchRate = 0;
     *rollRate = 0;

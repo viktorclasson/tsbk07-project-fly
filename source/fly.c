@@ -81,37 +81,37 @@ void collisionDetection(Point3D* position, Point3D* forward, Point3D *up, Point3
   ScalarMult(up, bottom, &edgePoint);
   VectorAdd(position, &edgePoint, &edgePoint);
   ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Bottom hit ground! \n"); hitGround = 1};
+  if(edgePoint.y <= ground) {printf("Bottom hit ground! \n"); hitGround = 1;}
   
   // Check top of plane
   ScalarMult(up, top, &edgePoint);
   VectorAdd(position, &edgePoint, &edgePoint);
   ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Top hit ground! \n"); hitGround = 2};
+  if(edgePoint.y <= ground) {printf("Top hit ground! \n"); hitGround = 2;}
   
   // Check front of plane
   ScalarMult(forward, front, &edgePoint);
   VectorAdd(position, &edgePoint, &edgePoint);
   ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Front hit ground! \n"); hitGround = 3};
+  if(edgePoint.y <= ground) {printf("Front hit ground! \n"); hitGround = 3;}
   
   // Check back of plane
   ScalarMult(forward, back, &edgePoint);
   VectorAdd(position, &edgePoint, &edgePoint);
   ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Back hit ground! \n"); hitGround = 4};
+  if(edgePoint.y <= ground) {printf("Back hit ground! \n"); hitGround = 4;}
   
   // Check front of plane
   ScalarMult(right, rightWing, &edgePoint);
   VectorAdd(position, &edgePoint, &edgePoint);
   ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Right wing hit ground! \n"); hitGround = 5};
+  if(edgePoint.y <= ground) {printf("Right wing hit ground! \n"); hitGround = 5;}
   
   // Check back of plane
   ScalarMult(right, leftWing, &edgePoint);
   VectorAdd(position, &edgePoint, &edgePoint);
   ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Left wing ground! \n"); hitGround = 6};
+  if(edgePoint.y <= ground) {printf("Left wing ground! \n"); hitGround = 6;}
  
 }
 
