@@ -13,6 +13,7 @@ GLfloat scaleFactor = 0.5;
 GLfloat initialRotY = -3.14159265358979323846/2;
 
 // Textures
+GLuint planeTex;
 
 // Shaders
 GLuint plane_program;
@@ -22,6 +23,9 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
   plane = LoadModelPlus("objects/Harrier-GR.1.obj");
   
   plane_program = loadShaders("shaders/airplane.vert","shaders/airplane.frag");
+  
+  glUseProgram(plane_program);
+  LoadTGATextureSimple("textures/harrier.tga", &planeTex);
   
   *thrust = 0;
   *yawRate = 0;
@@ -116,6 +120,10 @@ void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* posit
   // Upload model and normal matrices
   glUniformMatrix4fv(glGetUniformLocation(plane_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
   glUniformMatrix3fv(glGetUniformLocation(plane_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
+  
+  // Upload textures
+  glBindTexture(GL_TEXTURE_2D, planeTex);
+  glUniform1i(glGetUniformLocation(plane_program, "texUnit"), 0); // Texture unit 1
   
   // Draw the plane
   DrawModel(plane, plane_program, "inPosition", "inNormal", "inTexCoord");

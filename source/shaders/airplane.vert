@@ -16,6 +16,5 @@ fragNormal = normalMatrix * inNormal;
 
 gl_Position = mdlMatrix * vec4(inPosition, 1.0);
 
-fragNormal = inNormal;
 fragTexCoord = inTexCoord;
 }
