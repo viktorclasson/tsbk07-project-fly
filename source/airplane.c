@@ -10,7 +10,7 @@ Model *plane;
 GLfloat scaleFactor = 0.5;
 
 // Initial rotation for airplane model
-GLfloat initialRotY = 3.14159265358979323846/2;
+GLfloat initialRotY = -3.14159265358979323846/2;
 
 // Textures
 
