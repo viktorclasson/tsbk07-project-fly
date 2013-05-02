@@ -17,6 +17,7 @@ GLfloat camMatrix[16], projMatrix[16]; //projMatrix skall ej användas längre, ta
 // Airplane variables
 GLfloat yawRate, pitchRate, rollRate, velocity, thrust;
 Point3D position, forward, up, right;
+GLfloat front, back, leftWing, rightWing, bottom, top;
 
 // Camera variables (needed for world_display, letting them stay for now)
 Point3D camera_position, camera_look;
@@ -68,9 +69,47 @@ void mouseclick(int button, int state, int x, int y)
 
 
 
-void collisionDetection(Point3D* position)
+void collisionDetection(Point3D* position, Point3D* forward, Point3D *up, Point3D* right)
 {
+  Point3D edgePoint;
+  GLfloat ground;
   
+  // Check bottom of plane
+  ScalarMult(up, bottom, &edgePoint);
+  VectorAdd(position, &edgePoint, &edgePoint);
+  ground = World_GetHeight(edgePoint.x, edgePoint.z);
+  if(edgePoint.y <= ground) printf("Bottom hit ground! \n");
+  
+  // Check top of plane
+  ScalarMult(up, top, &edgePoint);
+  VectorAdd(position, &edgePoint, &edgePoint);
+  ground = World_GetHeight(edgePoint.x, edgePoint.z);
+  if(edgePoint.y <= ground) printf("Top hit ground! \n");
+  
+  // Check front of plane
+  ScalarMult(forward, front, &edgePoint);
+  VectorAdd(position, &edgePoint, &edgePoint);
+  ground = World_GetHeight(edgePoint.x, edgePoint.z);
+  if(edgePoint.y <= ground) printf("Front hit ground! \n");
+  
+  // Check back of plane
+  ScalarMult(forward, back, &edgePoint);
+  VectorAdd(position, &edgePoint, &edgePoint);
+  ground = World_GetHeight(edgePoint.x, edgePoint.z);
+  if(edgePoint.y <= ground) printf("Back hit ground! \n");
+  
+  // Check front of plane
+  ScalarMult(right, rightWing, &edgePoint);
+  VectorAdd(position, &edgePoint, &edgePoint);
+  ground = World_GetHeight(edgePoint.x, edgePoint.z);
+  if(edgePoint.y <= ground) printf("Right wing hit ground! \n");
+  
+  // Check back of plane
+  ScalarMult(right, leftWing, &edgePoint);
+  VectorAdd(position, &edgePoint, &edgePoint);
+  ground = World_GetHeight(edgePoint.x, edgePoint.z);
+  if(edgePoint.y <= ground) printf("Left wing ground! \n");
+ 
 }
 
 void init(void)
@@ -89,13 +128,13 @@ void init(void)
 	// Airplane
 	Dynamics_Init(&forward, &up, &right, &position, &velocity);
 	Airplane_Init(&thrust, &yawRate, &pitchRate, &rollRate);
+	Airplane_FindEdges(&front, &back, &leftWing, &rightWing, &top, &bottom);
 	
 	// Camera
 	Camera_Init(&forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
 	
 	// Terrain and skybox
 	World_Init(&camera_position, &camera_look);
-
 
 
 	// Projection, skall ej användas längre, tas bort när alla beroende funktioner är fixade
@@ -120,7 +159,7 @@ void display(void)
 	
 	// Commented for Debugging: Using mouse to look instead
 	// Update camera
-	//Camera_Update(&forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
+	Camera_Update(&forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
 
 	printError("pre display");
 
@@ -131,7 +170,7 @@ void display(void)
 	World_Draw(&camera_position, &camera_look, camMatrix, &position);
 	
 	// Check for collision
-	collisionDetection(&position);
+	collisionDetection(&position, &forward, &up, &right);
 	
 	// Draw airplane
 	Airplane_Draw(&forward, &up, &right, &position, camMatrix);

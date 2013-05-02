@@ -6,6 +6,9 @@ GLfloat projMatrix[16], mdlMatrix[16], normalMatrix[16];
 // Models
 Model *plane;
 
+// Scale factor for airplane model
+GLfloat scaleFactor = 0.5;
+
 // Textures
 
 // Shaders
@@ -96,7 +99,6 @@ void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3
   GLfloat Rot[16], Trans[16], Scale[16];
   
   // Make a scaling matrix
-  GLfloat scaleFactor = 0.5;
   S(scaleFactor, scaleFactor, scaleFactor, Scale);
   
   // Put airplane base vectors into rotation matrix, COLUMN WISE!!!
@@ -121,3 +123,33 @@ void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3
   // Complete the model matrix by applying projection  
   Mult(projMatrix, mdlMatrix, mdlMatrix); 
 }
+
+void Airplane_FindEdges(GLfloat* front, GLfloat* back, GLfloat* leftWing, GLfloat* rightWing, GLfloat* top, GLfloat* bottom)
+{
+  int i;
+  *bottom = 1e10;
+  *top = 1e-10;
+  *back = 1e10;
+  *front = 1e-10;
+  *leftWing = 1e10;
+  *rightWing = 1e-10;
+  for (i = 0; i < plane->numVertices; i++)
+  {
+    if (plane->vertexArray[3 * i] < *leftWing) *leftWing = plane->vertexArray[3 * i];
+    if (plane->vertexArray[3 * i] > *rightWing) *rightWing = plane->vertexArray[3 * i];
+    if (plane->vertexArray[3 * i+1] < *bottom) *bottom = plane->vertexArray[3 * i+1];
+    if (plane->vertexArray[3 * i+1] > *top) *top = plane->vertexArray[3 * i+1];
+    if (plane->vertexArray[3 * i+2] < *back) *back = plane->vertexArray[3 * i+2];
+    if (plane->vertexArray[3 * i+2] > *front) *front = plane->vertexArray[3 * i+2];
+  }
+
+  // Scale according to scale factor
+  *bottom = *bottom * scaleFactor;
+  *top = *top * scaleFactor;
+  *back = *back * scaleFactor;
+  *front = *front * scaleFactor;
+  *leftWing = *leftWing * scaleFactor;
+  *rightWing = *rightWing * scaleFactor;
+
+}
+	
