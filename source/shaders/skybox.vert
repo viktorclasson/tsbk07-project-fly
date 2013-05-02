@@ -17,5 +17,5 @@ uniform mat4 myMatrix;
 void main(void)
 {  
   texcoord = inTexCoord;
-  gl_Position = projMatrix * camMatrix * vec4(in_Position, 1.0);
+  gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(in_Position, 1.0);
 }

@@ -170,7 +170,7 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	// Draw ground and skybox
-	World_Draw(&camera_position, &camera_look, camMatrix, &position);
+	World_Draw(&camera_position, &camera_look, camMatrix, &position, &up, &right, &forward);
 	
 	// Check for collision
 	collisionDetection(&position, &forward, &up, &right);

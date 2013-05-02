@@ -101,7 +101,7 @@ GLfloat World_GetHeight(GLfloat x, GLfloat z)
     return y;
 }
 
-void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix, Point3D* position)
+void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix, Point3D* position, Point3D* plane_up, Point3D* plane_right, Point3D* plane_forward)
 {
 	// For time debugging
 	struct timespec t1,t2,t3,t4;
@@ -120,6 +120,13 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         sky_cameraMatrix[3] = 0;
         sky_cameraMatrix[7] = -0.5;
         sky_cameraMatrix[11] = 0;
+	
+	GLfloat Rot[16];
+	Rot[0] = plane_right->x ; Rot[1] = plane_up->x; Rot[2] = plane_forward->x; Rot[3] = 0;
+	Rot[4] = plane_right->y ; Rot[5] = plane_up->y; Rot[6] = plane_forward->y; Rot[7] = 0;
+	Rot[8] = plane_right->z ; Rot[9] = plane_up->z; Rot[10] = plane_forward->z; Rot[11] = 0;
+	Rot[12] = 0 ; Rot[13] = 0; Rot[14] = 0; Rot[15] = 1;
+	Transpose(Rot,Rot);
 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
@@ -127,11 +134,11 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         glBindTexture(GL_TEXTURE_2D, skytex);
         glUniform1i(glGetUniformLocation(sky_program, "texUnit"), 0); // Texture unit 1
         glUniformMatrix4fv(glGetUniformLocation(sky_program, "camMatrix"), 1, GL_TRUE, sky_cameraMatrix);
-        glUniformMatrix4fv(glGetUniformLocation(sky_program, "mdlMatrix"), 1, GL_TRUE, sky_mdlMatrix);
+        glUniformMatrix4fv(glGetUniformLocation(sky_program, "mdlMatrix"), 1, GL_TRUE, Rot);
         DrawModel(skybox, sky_program, "in_Position", "in_Normal", "inTexCoord");
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        //printf("x: %f, z: %f\n",camera_position.x,camera_position.z);
+        //printf("x: %f, z: %f\n",position->x,position->z);
        
         // Tree program
         //      Inits
@@ -155,8 +162,8 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	clock_gettime(CLOCK_REALTIME, &t1);
 	int i;
 	S(50.0,50.0,50.0,tree_scaleMatrix);
-	int mult_factor_x = (int)floor(camera_position->x/2000.0);
-	int mult_factor_z = (int)floor(camera_position->z/2000.0);
+	int mult_factor_x = (int)(camera_position->x/2000.0);
+	int mult_factor_z = (int)(camera_position->z/2000.0);
 	for(i=100;i>0;i=i-1)
 	{
 
@@ -191,6 +198,11 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         IdentityMatrix(modelView);
         glUniformMatrix4fv(glGetUniformLocation(terrain_program, "mdlMatrix"), 1, GL_TRUE, modelView);
         glUniformMatrix4fv(glGetUniformLocation(terrain_program, "camMatrix"), 1, GL_TRUE, camMatrix);
+	GLfloat curPos[3];
+	curPos[0] = position->x;
+	curPos[1] = position->y;
+	curPos[2] = position->z;
+	glUniform3fv(glGetUniformLocation(terrain_program, "currentPosition"), 1, curPos);
        
         glBindTexture(GL_TEXTURE_2D, tex1);             // Bind Our Texture tex1
         DrawModel(tm, terrain_program, "inPosition", "inNormal", "inTexCoord");

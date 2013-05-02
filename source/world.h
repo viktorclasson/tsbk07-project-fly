@@ -15,7 +15,7 @@
 #include <math.h>
 
 void World_Init(Point3D* camera_position, Point3D* camera_look);
-void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix, Point3D* position);
+void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix, Point3D* position, Point3D* plane_up, Point3D* plane_right, Point3D* plane_forward);
 GLfloat World_GetHeight(GLfloat x, GLfloat z);
 
 #endif
