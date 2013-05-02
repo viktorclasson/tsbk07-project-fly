@@ -171,16 +171,16 @@ void Airplane_FindEdges(GLfloat* front, GLfloat* back, GLfloat* leftWing, GLfloa
   *top = 1e-10;
   *back = 1e10;
   *front = 1e-10;
-  *leftWing = 1e10;
-  *rightWing = 1e-10;
+  *leftWing = 1e-10;
+  *rightWing = 1e10;
   for (i = 0; i < plane->numVertices; i++)
   {
-    if (plane->vertexArray[3 * i] < *leftWing) *leftWing = plane->vertexArray[3 * i];
-    if (plane->vertexArray[3 * i] > *rightWing) *rightWing = plane->vertexArray[3 * i];
-    if (plane->vertexArray[3 * i+1] < *bottom) *bottom = plane->vertexArray[3 * i+1];
-    if (plane->vertexArray[3 * i+1] > *top) *top = plane->vertexArray[3 * i+1];
-    if (plane->vertexArray[3 * i+2] < *back) *back = plane->vertexArray[3 * i+2];
-    if (plane->vertexArray[3 * i+2] > *front) *front = plane->vertexArray[3 * i+2];
+    if (plane->vertexArray[3 * i] < *back) *back = plane->vertexArray[3 * i]; //xmin
+    if (plane->vertexArray[3 * i] > *front) *front = plane->vertexArray[3 * i]; //xmax
+    if (plane->vertexArray[3 * i+1] < *bottom) *bottom = plane->vertexArray[3 * i+1]; //ymin
+    if (plane->vertexArray[3 * i+1] > *top) *top = plane->vertexArray[3 * i+1]; //ymax
+    if (plane->vertexArray[3 * i+2] < *rightWing) *rightWing = plane->vertexArray[3 * i+2]; //zmin
+    if (plane->vertexArray[3 * i+2] > *leftWing) *leftWing = plane->vertexArray[3 * i+2]; //zmax
   }
 
   // Scale according to scale factor

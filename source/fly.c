@@ -20,19 +20,15 @@ GLuint firstPersonView;
 // Airplane variables
 GLfloat yawRate, pitchRate, rollRate, velocity, thrust;
 Point3D position, forward, up, right;
-GLfloat front, back, leftWing, rightWing, bottom, top;
 
 // Camera variables (needed for world_display, letting them stay for now)
 Point3D camera_position, camera_look;
-
-// Game flow flags
-int hitGround;
 
 #include "airplane.h"
 #include "camera.h"
 #include "dynamics.h"
 #include "world.h"
-
+#include "game.h"
 
 //Fï¿½r debugging endast!
 int x_click;
@@ -69,55 +65,6 @@ void mouseclick(int button, int state, int x, int y)
 }
 //____________________________
 
-
-
-
-
-
-
-void collisionDetection(Point3D* position, Point3D* forward, Point3D *up, Point3D* right)
-{
-  Point3D edgePoint;
-  GLfloat ground;
-  
-  // Check bottom of plane
-  ScalarMult(up, bottom, &edgePoint);
-  VectorAdd(position, &edgePoint, &edgePoint);
-  ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Bottom hit ground! \n"); hitGround = 1;}
-  
-  // Check top of plane
-  ScalarMult(up, top, &edgePoint);
-  VectorAdd(position, &edgePoint, &edgePoint);
-  ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Top hit ground! \n"); hitGround = 2;}
-  
-  // Check front of plane
-  ScalarMult(forward, front, &edgePoint);
-  VectorAdd(position, &edgePoint, &edgePoint);
-  ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Front hit ground! \n"); hitGround = 3;}
-  
-  // Check back of plane
-  ScalarMult(forward, back, &edgePoint);
-  VectorAdd(position, &edgePoint, &edgePoint);
-  ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Back hit ground! \n"); hitGround = 4;}
-  
-  // Check front of plane
-  ScalarMult(right, rightWing, &edgePoint);
-  VectorAdd(position, &edgePoint, &edgePoint);
-  ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Right wing hit ground! \n"); hitGround = 5;}
-  
-  // Check back of plane
-  ScalarMult(right, leftWing, &edgePoint);
-  VectorAdd(position, &edgePoint, &edgePoint);
-  ground = World_GetHeight(edgePoint.x, edgePoint.z);
-  if(edgePoint.y <= ground) {printf("Left wing ground! \n"); hitGround = 6;}
- 
-}
-
 void init(void)
 {	
 	dumpInfo();
@@ -128,13 +75,10 @@ void init(void)
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
 	printError("GL inits");
-	
-
 
 	// Airplane
 	Dynamics_Init(&forward, &up, &right, &position, &velocity);
 	Airplane_Init(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView);
-	Airplane_FindEdges(&front, &back, &leftWing, &rightWing, &top, &bottom);
 	
 	// Camera
 	Camera_Init(firstPersonView, &forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
@@ -142,7 +86,9 @@ void init(void)
 	// Terrain and skybox
 	World_Init(&camera_position, &camera_look);
 
-
+	// Init game
+	Game_Init();
+	
 	// Projection, skall ej användas längre, tas bort när alla beroende funktioner är fixade
 	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projMatrix);
 	
@@ -155,34 +101,40 @@ void display(void)
     //printf("POS: x: %f, y: %f, z: %f    LOOK: x: %f, y: %f, z: %f\n", camera_position.x, camera_position.y, camera_position.z, camera_look.x, camera_look.y, camera_look.z);
     //--------------------
     
-    
-	// Get user input
-	Airplane_Keyboard(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView);
+	if(Game_HitGround())
+	{
+	  Game_Over();
+	}
+	else
+	{
+	  // Get user input
+	  Airplane_Keyboard(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView);
 
-	// Update airplane dynamics
-	Dynamics_CalcRot(yawRate, pitchRate, rollRate, &forward, &up, &right);
-	Dynamics_CalcPos(thrust, &forward, &velocity, &position);
+	  // Update airplane dynamics
+	  Dynamics_CalcRot(yawRate, pitchRate, rollRate, &forward, &up, &right);
+	  Dynamics_CalcPos(thrust, &forward, &velocity, &position);
 	
-	// Commented for Debugging: Using mouse to look instead
-	// Update camera
-	Camera_Update(firstPersonView, &forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
+	  // Commented for Debugging: Using mouse to look instead
+	  // Update camera
+	  Camera_Update(firstPersonView, &forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
 
-	printError("pre display");
+	  printError("pre display");
 
-	// clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	// Draw ground and skybox
-	World_Draw(&camera_position, &camera_look, camMatrix, &position, &up, &right, &forward);
-	
-	// Check for collision
-	collisionDetection(&position, &forward, &up, &right);
-	
-	// Draw airplane
-	Airplane_Draw(&forward, &up, &right, &position, camMatrix);
+	  // clear the screen
+	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	  
+	  // Draw ground and skybox
+	  World_Draw(&camera_position, &camera_look, camMatrix, &position, &up, &right, &forward);
+	  
+	  // Check for collision
+	  Game_CollisionDetection(&position, &forward, &up, &right);
+	  
+	  // Draw airplane
+	  Airplane_Draw(&forward, &up, &right, &position, camMatrix);  
+	}
 	
 	printError("display");
-	
+	  
 	glutSwapBuffers();
 }
 
