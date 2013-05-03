@@ -18,7 +18,7 @@ GLuint planeTex;
 // Shaders
 GLuint plane_program;
 
-void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView)
+void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag)
 {
   plane = LoadModelPlus("objects/Harrier-GR.1.obj");
   
@@ -34,11 +34,13 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
   *rollRate = 0;
   *firstPersonView = 0;
   
+  *resetFlag = 0;
+  
   // Projection
   frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projMatrix);
 }
 
-void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView)
+void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag)
 {
   GLfloat pitchModifier = 0.020;
   GLfloat rollModifier = 0.035;
@@ -101,12 +103,9 @@ void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GL
     *firstPersonView = 0;
   }
   
-  if(keyIsDown('r')) //decrease thust
+  if(keyIsDown('r')) //reset game
   {
-    *pitchRate = 0;
-    *rollRate = 0;
-    *yawRate = 0;
-    *thrust = 0;
+    *resetFlag = 1;
   }
 }
 
@@ -150,14 +149,8 @@ void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3
   
   // Make a translation matrix
   T(position->x, position->y, position->z, transMatrix);
- /*
+
   // Put them together to the model matrix, and apply model-to-view matrix
-  Mult(initialRotMatrix, scaleMatrix, mdlMatrix); 
-  Mult(rotMatrix, mdlMatrix, mdlMatrix); 
-  Mult(transMatrix, mdlMatrix, mdlMatrix);
-  Mult(camMatrix, mdlMatrix, mdlMatrix);
-  */
-   // Put them together to the model matrix, and apply model-to-view matrix
   Mult(rotMatrix, initialRotMatrix, mdlMatrix); 
   Mult(scaleMatrix, mdlMatrix, mdlMatrix); 
   Mult(transMatrix, mdlMatrix, mdlMatrix);

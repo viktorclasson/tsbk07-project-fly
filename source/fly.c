@@ -24,6 +24,9 @@ Point3D position, forward, up, right;
 // Camera variables (needed for world_display, letting them stay for now)
 Point3D camera_position, camera_look;
 
+// Flag for signaling reset of game
+GLuint resetFlag;
+
 #include "airplane.h"
 #include "camera.h"
 #include "dynamics.h"
@@ -78,7 +81,7 @@ void init(void)
 
 	// Airplane
 	Dynamics_Init(&forward, &up, &right, &position, &velocity);
-	Airplane_Init(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView);
+	Airplane_Init(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView, &resetFlag);
 	
 	// Camera
 	Camera_Init(firstPersonView, &forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
@@ -103,12 +106,19 @@ void display(void)
     
 	if(Game_HitGround())
 	{
+	  // Check keyboard for reset
+	  Airplane_Keyboard(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView, &resetFlag);
 	  Game_Over();
+	  
+	  if(resetFlag == 1)
+	  {
+	    Game_Reset(&forward, &up, &right, &position, &velocity, &thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView, &resetFlag, &camera_position, &camera_look, camMatrix);
+	  }
 	}
 	else
 	{
 	  // Get user input
-	  Airplane_Keyboard(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView);
+	  Airplane_Keyboard(&thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView, &resetFlag);
 
 	  // Update airplane dynamics
 	  Dynamics_CalcRot(yawRate, pitchRate, rollRate, &forward, &up, &right);
@@ -130,7 +140,13 @@ void display(void)
 	  Game_CollisionDetection(&position, &forward, &up, &right);
 	  
 	  // Draw airplane
-	  Airplane_Draw(&forward, &up, &right, &position, camMatrix);  
+	  Airplane_Draw(&forward, &up, &right, &position, camMatrix);
+	  
+	  // Reset game?
+	  if(resetFlag == 1)
+	  {
+	    Game_Reset(&forward, &up, &right, &position, &velocity, &thrust, &yawRate, &pitchRate, &rollRate, &firstPersonView, &resetFlag, &camera_position, &camera_look, camMatrix);
+	  }
 	}
 	
 	printError("display");

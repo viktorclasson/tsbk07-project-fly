@@ -76,5 +76,13 @@ void Game_CollisionDetection(Point3D* position, Point3D* forward,  Point3D* up, 
 
 void Game_Over(void)
 {
- // Do something 
+ // Do something
+}
+
+void Game_Reset(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* velocity, GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag, Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix)
+{
+  Dynamics_Init(forward, up, right, position, velocity);
+  Airplane_Init(thrust, yawRate, pitchRate, rollRate, firstPersonView, resetFlag);
+  Camera_Init(*firstPersonView, forward, up, position, *velocity, camera_position, camera_look, camMatrix);
+  Game_Init();
 }
