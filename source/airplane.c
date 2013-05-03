@@ -40,8 +40,8 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
 
 void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView)
 {
-  GLfloat pitchModifier = 0.04;
-  GLfloat rollModifier = 0.04;
+  GLfloat pitchModifier = 0.020;
+  GLfloat rollModifier = 0.035;
   GLfloat yawModifier = 0.01;
   GLfloat thrustModifier = 0.05;
   
