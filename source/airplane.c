@@ -150,10 +150,16 @@ void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3
   
   // Make a translation matrix
   T(position->x, position->y, position->z, transMatrix);
-  
+ /*
   // Put them together to the model matrix, and apply model-to-view matrix
   Mult(initialRotMatrix, scaleMatrix, mdlMatrix); 
   Mult(rotMatrix, mdlMatrix, mdlMatrix); 
+  Mult(transMatrix, mdlMatrix, mdlMatrix);
+  Mult(camMatrix, mdlMatrix, mdlMatrix);
+  */
+   // Put them together to the model matrix, and apply model-to-view matrix
+  Mult(rotMatrix, initialRotMatrix, mdlMatrix); 
+  Mult(scaleMatrix, mdlMatrix, mdlMatrix); 
   Mult(transMatrix, mdlMatrix, mdlMatrix);
   Mult(camMatrix, mdlMatrix, mdlMatrix);
   
