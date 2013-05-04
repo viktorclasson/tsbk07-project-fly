@@ -20,7 +20,7 @@ GLuint plane_program;
 
 void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag)
 {
-  plane = LoadModelPlus("objects/Harrier-GR.1.obj");
+  plane = LoadModelPlus("objects/Harrier-GR.2.obj");
   
   plane_program = loadShaders("shaders/airplane.vert","shaders/airplane.frag");
   
