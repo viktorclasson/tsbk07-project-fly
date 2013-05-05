@@ -119,12 +119,28 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
        
         // Skybox
         GLfloat sky_cameraMatrix[16];
+	//printf("First person: %d \n plane_up %f %f %f \n",firstPersonView,plane_up->x,plane_up->y,plane_up->z);
+	//printf("Absolute value: %f \n", sqrt(powf(plane_up->x,2) + powf(plane_up->y,2) + powf(plane_up->z,2)));
+	Point3D yhat = {0,1,0};
+	//printf("Yhat: %f %f %f\n",yhat.x,yhat.y,yhat.z);
 	if(firstPersonView == 1) // Equals to first persion view!
 	{
+
+	  //CrossProduct(&yhat,plane_up,&yhat);
 	  lookAt(camera_position,camera_look,plane_up->x,plane_up->y,plane_up->z,sky_cameraMatrix);
-	  sky_cameraMatrix[3] = -0.5*plane_up->x;
-	  sky_cameraMatrix[7] = -0.5*plane_up->y;
-	  sky_cameraMatrix[11] = -0.5*plane_up->z;
+	  OrthoNormalizeMatrix(sky_cameraMatrix);
+	  MatrixMultPoint3D(sky_cameraMatrix,&yhat,&yhat);
+	  Normalize(&yhat);
+	  //lookAt(camera_position,camera_look,yhat.x,yhat.y,yhat.z,sky_cameraMatrix);
+	  //sky_cameraMatrix[3] = -0.5*plane_up->x;
+	  //sky_cameraMatrix[7] = -0.5*plane_up->y;
+	  //sky_cameraMatrix[11] = -0.5*plane_up->z;
+	  sky_cameraMatrix[3] = -0.5*yhat.x;
+	  sky_cameraMatrix[7] = -0.5*yhat.y;
+	  sky_cameraMatrix[11] = -0.5*yhat.z;
+	  //sky_cameraMatrix[3] = 0.0;
+	  //sky_cameraMatrix[7] = 0.0;
+	  //sky_cameraMatrix[11] = 0.0;
 	}
 	else
 	{
@@ -133,6 +149,8 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	  sky_cameraMatrix[7] = -0.5;
 	  sky_cameraMatrix[11] = 0.0;
 	}
+	
+	//printf("Cam mult yhat: %f %f %f\n",yhat.x,yhat.y,yhat.z);
 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
