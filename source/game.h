@@ -7,6 +7,8 @@
 	#include <GL/gl.h>
 #endif
 
+#include <time.h>
+
 #include "utils/VectorUtils2.h"
 #include "utils/GL_utilities.h"
 #include "utils/loadobj.h"

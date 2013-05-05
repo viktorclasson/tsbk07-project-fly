@@ -4,7 +4,10 @@
 GLfloat front, back, leftWing, rightWing, bottom, top;
 
 // Game flow flags
-int hitGround, hitGroundEnable, hitTarget;
+int hitGround, hitGroundEnable, hitTarget, gameRunning, gameStarted;
+
+// Game flow varibles
+time_t start, end;
 
 // Target model
 Model *target;
@@ -46,23 +49,23 @@ void Game_PlaceTargets(void)
   SetVector(50,140,100,&targetPosition[0]);
   targetAngle[0] = 0;
   SetVector(50,160,150,&targetPosition[1]);
-  targetAngle[1] = 0;
+  targetAngle[1] = 0.1;
   SetVector(60,160,300,&targetPosition[2]);
-  targetAngle[2] = -M_PI*0.2;
-  SetVector(70,150,400,&targetPosition[3]);
-  targetAngle[3] = -M_PI*0.3;
-  SetVector(80,150,500,&targetPosition[4]);
-  targetAngle[4] = -M_PI*0.3;
-  SetVector(80,150,500,&targetPosition[5]);
-  targetAngle[5] = -M_PI*0.3;
-  SetVector(100,160,550,&targetPosition[6]);
-  targetAngle[6] = -M_PI*0.3;
-  SetVector(120,160,575,&targetPosition[7]);
-  targetAngle[7] = -M_PI*0.3;
-  SetVector(150,150,600,&targetPosition[8]);
-  targetAngle[8] = -M_PI*0.3;
-  SetVector(200,150,600,&targetPosition[9]);
-  targetAngle[9] = -M_PI*0.3;
+  targetAngle[2] = -M_PI*0.15;
+  SetVector(80,150,350,&targetPosition[3]);
+  targetAngle[3] = -M_PI*0.20;
+  SetVector(100,150,400,&targetPosition[4]);
+  targetAngle[4] = -M_PI*0.25;
+  SetVector(130,150,430,&targetPosition[5]);
+  targetAngle[5] = -M_PI*0.30;
+  SetVector(160,160,450,&targetPosition[6]);
+  targetAngle[6] = -M_PI*0.35;
+  SetVector(180,160,470,&targetPosition[7]);
+  targetAngle[7] = -M_PI*0.40;
+  SetVector(210,150,500,&targetPosition[8]);
+  targetAngle[8] = -M_PI*0.45;
+  SetVector(270,150,500,&targetPosition[9]);
+  targetAngle[9] = -M_PI*0.5;
 }
 
 void Game_Init(void)
@@ -74,6 +77,8 @@ void Game_Init(void)
   hitGroundEnable = 1;
   hitTarget = 0;
   currentTarget = 0;
+  gameRunning = 0; 
+  gameStarted = 1;
 
   // Init target
   target = LoadModelPlus("objects/torus.obj");
@@ -162,7 +167,9 @@ void Game_Over(void)
 
 void Game_Complete(void)
 {
-  printf("Congratulations, you've completed the flight! \n");
+	double runTime;
+	runTime = difftime(end,start);
+	printf("Congratulations, you've completed the flight in %.f seconds! \n",runTime);
 }
 
 void Game_Reset(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* velocity, GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag, Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix)
@@ -209,22 +216,35 @@ void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos)
 
 void Game_Loop(Point3D planePosition)
 {
-  Game_DetectTargetHit(planePosition);
-  if (hitTarget) {
-    hitTarget = 0;
-    printf("Passed target %d of %d!\n",currentTarget+1,numTargets);
-    if(currentTarget < numTargets - 1){
-      currentTarget++;
-      currentTarget = currentTarget;
-      currentPosition = targetPosition[currentTarget];
-      currentAngle = targetAngle[currentTarget];
-      Game_FindTargetBoundries();
-    }
-    else
-      {
-	Game_Complete();
-      }
-  }
+	if(gameStarted)
+	{
+		gameRunning = 1;
+		time(&start);
+		gameStarted = 0;
+	}
+  
+	if(gameRunning){
+		Game_DetectTargetHit(planePosition);
+		if (hitTarget) {
+			hitTarget = 0;
+			printf("Passed target %d of %d!\n",currentTarget+1,numTargets);
+			if(currentTarget < numTargets - 1){
+				currentTarget++;
+				currentTarget = currentTarget;
+				currentPosition = targetPosition[currentTarget];
+				currentAngle = targetAngle[currentTarget];
+				Game_FindTargetBoundries();
+			}
+			else{
+				gameRunning = 0;
+				time(&end);
+				currentTarget = 0;
+				currentPosition = targetPosition[currentTarget];
+				currentAngle = targetAngle[currentTarget];
+				Game_Complete();
+			}
+		}
+	}
 } 
 
 void Game_DetectTargetHit(Point3D planePosition)
