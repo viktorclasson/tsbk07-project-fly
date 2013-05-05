@@ -152,7 +152,6 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         glUseProgram(tree_program);
         GLfloat tree_mtwMatrix[16];
         GLfloat tree_scaleMatrix[16];
-        GLfloat tree_placeMatrix[16];
         Point3D tree_position;
 	
 	glActiveTexture(GL_TEXTURE4);

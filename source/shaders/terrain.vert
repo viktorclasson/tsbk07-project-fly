@@ -29,8 +29,10 @@ void main(void)
 {
 	// Generate terrain
 	vec3 real_position = inPosition;
-	real_position.x=(inPosition.x*currentPosition.y/20.0) + currentPosition.x;
-	real_position.z=(inPosition.z*currentPosition.y/20.0) + currentPosition.z;
+	// real_position.x=(inPosition.x*currentPosition.y/50.0) + currentPosition.x;
+	// real_position.z=(inPosition.z*currentPosition.y/50.0) + currentPosition.z;
+	real_position.x=inPosition.x + currentPosition.x;
+	real_position.z=inPosition.z + currentPosition.z;
 	//real_position.y = abs((sin(real_position.x/600)*sin(real_position.z/400)*100)+(5.0*sin(real_position.z/100.0-0.5)*2.0*sin(real_position.x/40.0)))-1.5;
 	real_position.y=heightfunction(real_position.x,real_position.z);
 	// Calculate normals, one way of doing it, thera are probably better!
