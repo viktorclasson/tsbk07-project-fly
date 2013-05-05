@@ -68,6 +68,11 @@ void mouseclick(int button, int state, int x, int y)
 }
 //____________________________
 
+void printVector(Point3D *v)
+{
+	printf("x: %f, y: %f, z: %f \n", v->x, v->y, v->z);
+}
+
 void init(void)
 {	
 	dumpInfo();
@@ -139,9 +144,17 @@ void display(void)
 	  // Check for collision
 	  Game_CollisionDetection(&position, &forward, &up, &right);
 	  
+	  // The game loop
+	  Game_Loop(position);
+
+	  
 	  // Draw airplane
 	  Airplane_Draw(&forward, &up, &right, &position, camMatrix);
 	  
+	  // Draw target
+	  Game_DrawTarget(camMatrix);
+	  
+
 	  // Reset game?
 	  if(resetFlag == 1)
 	  {
@@ -150,7 +163,7 @@ void display(void)
 	}
 	
 	printError("display");
-	  
+
 	glutSwapBuffers();
 }
 

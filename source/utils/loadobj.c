@@ -1237,7 +1237,33 @@ static void SkipToCRLF()
     return m;
   }
   
-  
+void FindEdges(Model* m, GLfloat scaleFactor, GLfloat* xmax, GLfloat* xmin, GLfloat* zmax, GLfloat* zmin, GLfloat* ymax, GLfloat* ymin)
+{
+  int i;
+  *ymin = 1e10;
+  *ymax = 1e-10;
+  *xmin = 1e10;
+  *xmax = 1e-10;
+  *zmax = 1e-10;
+  *zmin = 1e10;
+  for (i = 0; i < m->numVertices; i++)
+  {
+    if (m->vertexArray[3 * i] < *xmin) *xmin = m->vertexArray[3 * i];
+    if (m->vertexArray[3 * i] > *xmax) *xmax = m->vertexArray[3 * i];
+    if (m->vertexArray[3 * i+1] < *ymin) *ymin = m->vertexArray[3 * i+1];
+    if (m->vertexArray[3 * i+1] > *ymax) *ymax = m->vertexArray[3 * i+1];
+    if (m->vertexArray[3 * i+2] < *zmin) *zmin = m->vertexArray[3 * i+2];
+    if (m->vertexArray[3 * i+2] > *zmax) *zmax = m->vertexArray[3 * i+2];
+  }
+
+  *ymin = *ymin * scaleFactor;
+  *ymax = *ymax * scaleFactor;
+  *xmin = *xmin * scaleFactor;
+  *xmax = *xmax * scaleFactor;
+  *zmin = *zmin * scaleFactor;
+  *zmax = *zmax * scaleFactor;
+
+}
   
   
   

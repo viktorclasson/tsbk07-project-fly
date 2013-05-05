@@ -61,6 +61,7 @@ Model* LoadDataToModel(
 			int numVert,
 			int numInd);
 
+void FindEdges(Model* m, GLfloat scaleFactor, GLfloat* xmax, GLfloat* xmin, GLfloat* zmax, GLfloat* zmin, GLfloat* ymax, GLfloat* ymin);
 /*
 Model* LoadDataToModel(
 			GLfloat *vertices,
