@@ -23,9 +23,23 @@ GLfloat targetAngle[numTargets]; // Angle wrt the y-axis
 GLfloat currentAngle; // Current target angle
 GLfloat sf;
 int currentTarget;
+GLfloat xmax, xmin, zmax, zmin, ymax, ymin;
 
 // Matrices
 GLfloat projMatrix[16];
+
+void Game_FindTargetBoundries(void)
+{
+  // Get boundries
+  FindEdges(target, sf, &xmax, &xmin, &ymax, &ymin, &zmax, &zmin);
+  // Calculate boundries in world
+  xmax = xmax + currentPosition.x;
+  xmin = xmin + currentPosition.x;
+  zmax = zmax + currentPosition.z;
+  zmin = zmin + currentPosition.z;
+  ymax = ymax + currentPosition.y;
+  ymin = ymin + currentPosition.y;
+}
 
 void Game_Init(void)
 {
@@ -38,10 +52,10 @@ void Game_Init(void)
   currentTarget = 0;
 
   // Init target
-  target = LoadModelPlus("objects/groundsphere.obj");
+  target = LoadModelPlus("objects/torus.obj");
   target_program = loadShaders("shaders/target.vert", "shaders/target.frag");
   glUseProgram(target_program);
-  LoadTGATextureSimple("textures/conc.tga",&targetTex);
+  LoadTGATextureSimple("textures/gold.tga",&targetTex);
 
   // Place targets
   SetVector(50,140,100,&targetPosition[0]);
@@ -50,15 +64,17 @@ void Game_Init(void)
   targetAngle[1] = 0;
   SetVector(60,160,300,&targetPosition[2]);
   targetAngle[2] = 0;
-  SetVector(70,150,500,&targetPosition[3]);
+  SetVector(70,150,400,&targetPosition[3]);
   targetAngle[3] = 0;
-  SetVector(800,150,700,&targetPosition[4]);
+  SetVector(80,150,500,&targetPosition[4]);
   targetAngle[4] = 0;
   currentPosition = targetPosition[currentTarget];
   currentAngle = targetAngle[currentTarget];
 
   // Scale factor
   sf = 5;
+
+  Game_FindTargetBoundries();
 
   // Projection
   frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 2000.0, projMatrix);
@@ -144,34 +160,28 @@ void Game_Reset(Point3D* forward, Point3D* up, Point3D* right, Point3D* position
 
 void Game_DrawTarget(GLfloat* camMatrix)
 {
-  GLfloat trans[16], rot[16], scale[16], mdlMatrix[16], normalMatrix[16];
+  GLfloat trans[16], iniRot[16], rot[16], scale[16], mdlMatrix[16];
   
   // Calculate model to world Matrix
   S(sf, sf, sf, scale);
   T(currentPosition.x, currentPosition.y, currentPosition.z, trans);
   Ry(currentAngle, rot);
+  Rx(3.141592/2, iniRot);
   IdentityMatrix(mdlMatrix);
   Mult(scale, mdlMatrix, mdlMatrix);
+  Mult(iniRot, mdlMatrix, mdlMatrix);
   Mult(rot, mdlMatrix, mdlMatrix);
   Mult(trans, mdlMatrix, mdlMatrix);
 
   // Make model to view Matrix
   Mult(camMatrix, mdlMatrix, mdlMatrix);
-  
-  // Extract the normal matrix from the model matrix
-  normalMatrix[0] = mdlMatrix[0]; normalMatrix[1] = mdlMatrix[1]; normalMatrix[2] = mdlMatrix[2];
-  normalMatrix[4] = mdlMatrix[4]; normalMatrix[5] = mdlMatrix[5]; normalMatrix[6] = mdlMatrix[6]; 
-  normalMatrix[8] = mdlMatrix[8]; normalMatrix[9] = mdlMatrix[9]; normalMatrix[10] = mdlMatrix[10]; 
-  
-  // Apply projection
-  Mult(projMatrix, mdlMatrix, mdlMatrix);
 
   // Upload model to view Matrix
   glUseProgram(target_program);
   
    // Upload model and normal matrices
   glUniformMatrix4fv(glGetUniformLocation(target_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
-  glUniformMatrix3fv(glGetUniformLocation(target_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(target_program, "projMatrix"), 1, GL_TRUE, projMatrix);
   
   // Upload textures
   glUniform1i(glGetUniformLocation(target_program, "texUnit"), 0); // Texture unit 1
@@ -193,6 +203,7 @@ void Game_Loop(Point3D planePosition)
       currentTarget = currentTarget;
       currentPosition = targetPosition[currentTarget];
       currentAngle = targetAngle[currentTarget];
+      Game_FindTargetBoundries();
     }
     else
       {
@@ -203,18 +214,6 @@ void Game_Loop(Point3D planePosition)
 
 void Game_DetectTargetHit(Point3D planePosition)
 {
-  // Get boundries
-  GLfloat xmax, xmin, zmax, zmin, ymax, ymin;
-  FindEdges(target, sf, &xmax, &xmin, &zmax, &zmin, &ymax, &ymin);
-
-  // Calculate boundries in world
-  xmax = xmax + currentPosition.x;
-  xmin = xmin + currentPosition.x;
-  zmax = zmax + currentPosition.z;
-  zmin = zmin + currentPosition.z;
-  ymax = ymax + currentPosition.y;
-  ymin = ymin + currentPosition.y;
-
   // Check if plane is within boundries
   if(planePosition.x > xmin && planePosition.x < xmax 
      && planePosition.z > zmin && planePosition.z < zmax

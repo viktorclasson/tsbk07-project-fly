@@ -1,20 +1,21 @@
-#version 130
+#version 150
 
-in vec3 inPosition;
-in vec3 inNormal;
+in  vec3 inPosition;
+in  vec3 inNormal;
 in vec2 inTexCoord;
 
-out vec3 fragNormal;
-out vec2 fragTexCoord;
+// out
+out vec2 texCoord;
+out vec3 worldNormal;
 
-uniform mat3 normalMatrix; // Matrix for transformation of normal vectors
-uniform mat4 mdlMatrix; // Matrix for transformations of model vertices
+// NY
+uniform mat4 projMatrix;
+uniform mat4 mdlMatrix;
 
 void main(void)
 {
-fragNormal = normalMatrix * inNormal;
-
-gl_Position = mdlMatrix * vec4(inPosition, 1.0);
-
-fragTexCoord = inTexCoord;
+	mat3 normalMatrix1 = mat3(mdlMatrix);
+	worldNormal = normalize(normalMatrix1 * inNormal);
+	texCoord = inTexCoord;
+	gl_Position = projMatrix * mdlMatrix * vec4(inPosition, 1.0);
 }

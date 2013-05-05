@@ -147,7 +147,6 @@ void display(void)
 	  // The game loop
 	  Game_Loop(position);
 
-	  
 	  // Draw airplane
 	  Airplane_Draw(&forward, &up, &right, &position, camMatrix);
 	  
