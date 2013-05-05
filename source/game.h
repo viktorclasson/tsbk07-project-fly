@@ -21,7 +21,7 @@ void Game_Init(void);
 int Game_HitGround(void);
 void Game_Over(void);
 void Game_Reset(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* velocity, GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag, Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix);
-void Game_DrawTarget(GLfloat* camMatrix);
+void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos);
 void Game_DetectTargetHit(Point3D planePosition);
 void Game_Loop(Point3D planePosition);
 #endif

@@ -16,7 +16,7 @@ GLuint targetTex;
 GLuint target_program;
 
 // Target
-#define numTargets 5
+#define numTargets 10
 Point3D targetPosition[numTargets]; // Position of targets in world
 Point3D currentPosition; // Current target position
 GLfloat targetAngle[numTargets]; // Angle wrt the y-axis
@@ -41,6 +41,30 @@ void Game_FindTargetBoundries(void)
   ymin = ymin + currentPosition.y;
 }
 
+void Game_PlaceTargets(void)
+{
+  SetVector(50,140,100,&targetPosition[0]);
+  targetAngle[0] = 0;
+  SetVector(50,160,150,&targetPosition[1]);
+  targetAngle[1] = 0;
+  SetVector(60,160,300,&targetPosition[2]);
+  targetAngle[2] = -M_PI*0.2;
+  SetVector(70,150,400,&targetPosition[3]);
+  targetAngle[3] = -M_PI*0.3;
+  SetVector(80,150,500,&targetPosition[4]);
+  targetAngle[4] = -M_PI*0.3;
+  SetVector(80,150,500,&targetPosition[5]);
+  targetAngle[5] = -M_PI*0.3;
+  SetVector(100,160,550,&targetPosition[6]);
+  targetAngle[6] = -M_PI*0.3;
+  SetVector(120,160,575,&targetPosition[7]);
+  targetAngle[7] = -M_PI*0.3;
+  SetVector(150,150,600,&targetPosition[8]);
+  targetAngle[8] = -M_PI*0.3;
+  SetVector(200,150,600,&targetPosition[9]);
+  targetAngle[9] = -M_PI*0.3;
+}
+
 void Game_Init(void)
 {
   Airplane_FindEdges(&front, &back, &leftWing, &rightWing, &top, &bottom);
@@ -57,17 +81,8 @@ void Game_Init(void)
   glUseProgram(target_program);
   LoadTGATextureSimple("textures/gold.tga",&targetTex);
 
-  // Place targets
-  SetVector(50,140,100,&targetPosition[0]);
-  targetAngle[0] = 0;
-  SetVector(50,160,150,&targetPosition[1]);
-  targetAngle[1] = 0;
-  SetVector(60,160,300,&targetPosition[2]);
-  targetAngle[2] = 0;
-  SetVector(70,150,400,&targetPosition[3]);
-  targetAngle[3] = 0;
-  SetVector(80,150,500,&targetPosition[4]);
-  targetAngle[4] = 0;
+  // Place targets  
+  Game_PlaceTargets();
   currentPosition = targetPosition[currentTarget];
   currentAngle = targetAngle[currentTarget];
 
@@ -147,7 +162,7 @@ void Game_Over(void)
 
 void Game_Complete(void)
 {
-
+  printf("Congratulations, you've completed the flight! \n");
 }
 
 void Game_Reset(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* velocity, GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag, Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix)
@@ -158,7 +173,7 @@ void Game_Reset(Point3D* forward, Point3D* up, Point3D* right, Point3D* position
   Game_Init();
 }
 
-void Game_DrawTarget(GLfloat* camMatrix)
+void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos)
 {
   GLfloat trans[16], iniRot[16], rot[16], scale[16], mdlMatrix[16];
   
@@ -173,16 +188,15 @@ void Game_DrawTarget(GLfloat* camMatrix)
   Mult(rot, mdlMatrix, mdlMatrix);
   Mult(trans, mdlMatrix, mdlMatrix);
 
-  // Make model to view Matrix
-  Mult(camMatrix, mdlMatrix, mdlMatrix);
 
-  // Upload model to view Matrix
-  glUseProgram(target_program);
-  
-   // Upload model and normal matrices
+  // Upload matrices
+  glUseProgram(target_program);  
+
   glUniformMatrix4fv(glGetUniformLocation(target_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(target_program, "camMatrix"), 1, GL_TRUE, camMatrix);
   glUniformMatrix4fv(glGetUniformLocation(target_program, "projMatrix"), 1, GL_TRUE, projMatrix);
-  
+  glUniform3fv(glGetUniformLocation(target_program, "camera_position"), 1, &cameraPos->z); 
+
   // Upload textures
   glUniform1i(glGetUniformLocation(target_program, "texUnit"), 0); // Texture unit 1
   glActiveTexture(GL_TEXTURE0);
@@ -198,6 +212,7 @@ void Game_Loop(Point3D planePosition)
   Game_DetectTargetHit(planePosition);
   if (hitTarget) {
     hitTarget = 0;
+    printf("Passed target %d of %d!\n",currentTarget+1,numTargets);
     if(currentTarget < numTargets - 1){
       currentTarget++;
       currentTarget = currentTarget;
