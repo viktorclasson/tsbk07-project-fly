@@ -21,6 +21,8 @@ float heightfunction(float x, float z)
   int integer = 70;
   if (y>integer)
     y=y*pow(y-integer+1,0.6*sin(x/1000)*sin(z/5000));
+  if (y<1)
+    y=0.99999;
 
   return y;
 }
@@ -48,11 +50,24 @@ void main(void)
 	v=normalize(v-real_position);
 	vec3 calcNormal = cross(u,v);
 	worldNormal = normalize(normalMatrix1 * calcNormal);
+	if(real_position.y < 1)
+	{
+	  // Do some bumping on the water
+	  worldNormal.x = worldNormal.x*0.995+0.005*sin(real_position.x/5.0);
+	  worldNormal.z = worldNormal.z*0.995+0.005*sin(real_position.z/5.0);
+	  worldNormal=normalize(worldNormal);
+	}
 
 	
 	
 	worldPosition = vec3(mdlMatrix * vec4(real_position,1.0));
-	texCoord = inTexCoord;
+	//texCoord = inTexCoord;
+	// Calculate the texture coordinates
+	vec2 calctex;
+	calctex.x=real_position.x/60.0-floor(real_position.x/60.0);
+	calctex.y=real_position.z/60.0-floor(real_position.z/60.0);
+	
+	texCoord = calctex;
 	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(real_position, 1.0);
 }
 

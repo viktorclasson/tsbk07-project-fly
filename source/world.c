@@ -8,7 +8,7 @@
 Model *terrain, *skybox, *tm, *tree;
 
 // Textures
-GLuint tex1, tex2, treetexleaf, treetexbark;
+GLuint tex1, tex2, treetexleaf, treetexbark, tex_mountain;
 GLuint skytex;
 TextureData ttex; // terrain
 
@@ -65,7 +65,7 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   LoadTGATextureSimple("textures/SkyBox512.tga", &skytex);
   glUniformMatrix4fv(glGetUniformLocation(sky_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
  
-          glUniform1i(glGetUniformLocation(sky_program, "texUnit"), 3); // Texture unit 3
+  glUniform1i(glGetUniformLocation(sky_program, "texUnit"), 3); // Texture unit 3
 	  
   // Trees
   tree = LoadModelPlus("objects/tree1.obj");
@@ -75,8 +75,6 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   glUseProgram(tree_program);
   glUniform1i(glGetUniformLocation(tree_program, "texbark"), 4); // Texture unit 0
   LoadTGATextureSimple("textures/conc.tga", &treetexbark);
-  //glUniform1i(glGetUniformLocation(tree_program, "texleaf"), 2); // Texture unit 1
-  //LoadTGATextureSimple("objects/tree 1a - 1b/leafs1.tga", &treetexleaf);
  
   // Terrain
   terrain_program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
@@ -87,9 +85,11 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   // It don't work without it. /Viktor
   glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
 
-  glUniform1i(glGetUniformLocation(terrain_program, "tex"), 5); // Texture unit 0
+  glUniform1i(glGetUniformLocation(terrain_program, "tex"), 5); // Texture unit 5
   glUniform1i(glGetUniformLocation(terrain_program, "skybox_tex"), 1);
   LoadTGATextureSimple("textures/grass.tga", &tex1);
+  glUniform1i(glGetUniformLocation(terrain_program, "texMountain"), 8);
+  LoadTGATextureSimple("textures/granite.tga", &tex_mountain);
  
   // Load terrain data
   LoadTGATexture("textures/terrain.tga", &ttex);
@@ -103,6 +103,8 @@ GLfloat World_GetHeight(GLfloat x, GLfloat z)
   int integer = 70;
   if (y>integer)
     y=y*pow(y-integer+1,0.6*sin(x/1000)*sin(z/5000));
+  if (y < 1)
+    y=0.999;
   return y;
 }
 
@@ -125,22 +127,17 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	//printf("Yhat: %f %f %f\n",yhat.x,yhat.y,yhat.z);
 	if(firstPersonView == 1) // Equals to first persion view!
 	{
-
-	  //CrossProduct(&yhat,plane_up,&yhat);
+	  // The plane_up is the new yhat of the world => calculate that camMatrix
 	  lookAt(camera_position,camera_look,plane_up->x,plane_up->y,plane_up->z,sky_cameraMatrix);
+	  // Normalize that camMatrix
 	  OrthoNormalizeMatrix(sky_cameraMatrix);
+	  // And compute the new yhat of the terrain
 	  MatrixMultPoint3D(sky_cameraMatrix,&yhat,&yhat);
 	  Normalize(&yhat);
-	  //lookAt(camera_position,camera_look,yhat.x,yhat.y,yhat.z,sky_cameraMatrix);
-	  //sky_cameraMatrix[3] = -0.5*plane_up->x;
-	  //sky_cameraMatrix[7] = -0.5*plane_up->y;
-	  //sky_cameraMatrix[11] = -0.5*plane_up->z;
+	  // And scale by that
 	  sky_cameraMatrix[3] = -0.5*yhat.x;
 	  sky_cameraMatrix[7] = -0.5*yhat.y;
 	  sky_cameraMatrix[11] = -0.5*yhat.z;
-	  //sky_cameraMatrix[3] = 0.0;
-	  //sky_cameraMatrix[7] = 0.0;
-	  //sky_cameraMatrix[11] = 0.0;
 	}
 	else
 	{
@@ -174,7 +171,7 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, treetexbark);
-        glUniform1i(glGetUniformLocation(tree_program, "texbark"), 0);
+        
        
         // 	Upload projection matrix
         glUniformMatrix4fv(glGetUniformLocation(tree_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
@@ -220,15 +217,10 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	  // Draw only if above water level
 	  if(tree_position.y > 1)
 	  {
-		  //printf("******\nTree x: %f, z: %f \n",tree_position.x,tree_position.z);
-		  //printf("Multfactor x: %d, z: %d \n",mult_factor_x,mult_factor_z);
-		  //printf("Camera x: %f, z: %f\n",camera_position->x,camera_position->z);
 		  T(tree_position.x,tree_position.y,tree_position.z,tree_mtwMatrix);
 		  Mult(tree_mtwMatrix,tree_scaleMatrix,tree_mtwMatrix);
 		  // Upload model to world matrix and draw objects
 		  glUniformMatrix4fv(glGetUniformLocation(tree_program, "mdlMatrix"), 1, GL_TRUE, tree_mtwMatrix);
-		  
-		  //printf("Mult x: %f,y: %f, z: %f \n*******\n",viewdirection.x,viewdirection.y,viewdirection.z);
 
 		  DrawModel(tree, tree_program, "inPosition", "inNormal", "texCoord");
 	  }
@@ -250,7 +242,9 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, tex1);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, skytex);             // Bind Our Texture tex1
+	glBindTexture(GL_TEXTURE_2D, skytex);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, tex_mountain);	// Bind Our Texture tex1
         DrawModel(tm, terrain_program, "inPosition", "inNormal", "inTexCoord");
         // For time critical debugging
 	clock_gettime(CLOCK_REALTIME, &t4);
