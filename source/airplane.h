@@ -12,6 +12,24 @@
 #include "utils/loadobj.h"
 #include "utils/LoadTGA2.h"
 
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct
+{
+  Model* model;
+  Point3D Kd;
+  Point3D Ka;
+  Point3D Ks;
+  GLfloat Ns;
+  GLfloat Tr;
+  GLuint hasTexture;
+  GLuint texture;
+} ExtendedModel;
+
+ExtendedModel* LoadExtendedModel(char *name, Point3D *Kd, Point3D *Ka, Point3D *Ks, GLfloat Ns, GLfloat Tr, char *texture);
+void DrawExtendedModel(ExtendedModel *m, GLuint program, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName);
+
 void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag);
 void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag);
 void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix);

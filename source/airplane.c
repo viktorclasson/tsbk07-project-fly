@@ -4,7 +4,8 @@
 GLfloat projMatrix[16], mdlMatrix[16], normalMatrix[16];
 
 // Models
-Model *plane;
+ExtendedModel **planeModels;
+GLuint modelCount;
 
 // Scale factor for airplane model
 GLfloat scaleFactor = 0.5;
@@ -18,17 +19,110 @@ GLuint planeTex;
 // Shaders
 GLuint plane_program;
 
+ExtendedModel* LoadExtendedModel(char *name, Point3D *Kd, Point3D *Ka, Point3D *Ks, GLfloat Ns, GLfloat Tr, char *texture)
+{
+  ExtendedModel *m = malloc(sizeof(Model));
+  
+  Model *model;  
+  model = LoadModelPlus(name);
+  m->model = model;
+  m->Kd = *Kd;
+  m->Ka = *Ka;
+  m->Ks = *Ks;
+  m->Ns = Ns;
+  m->Tr = Tr;
+  
+  if(texture != NULL)
+  {
+    LoadTGATextureSimple(texture, &(m->texture));
+    m->hasTexture = 1;
+  }
+  else
+  {
+    m->hasTexture = 0;
+  }
+  
+  return m;
+}
+
+void DrawExtendedModel(ExtendedModel *m, GLuint program, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName)
+{
+  if(m->hasTexture == 1)
+  {
+    // Upload textures
+    glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 1
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m->texture);
+  }
+  
+  // Draw the plane
+  DrawModel(m->model, program, "inPosition", "inNormal", "inTexCoord");
+}
+
+ExtendedModel** Models_Init(void)
+{
+  modelCount = 6;
+  
+  ExtendedModel** models = malloc(sizeof(ExtendedModel*) * modelCount);
+  
+  Point3D Kd, Ka, Ks;
+  GLfloat Ns, Tr;
+  
+  //harrier_g0
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(1.0, 1.0, 1.0, &Ka);
+  SetVector(0.5, 0.5, 0.5, &Ks);
+  Ns = 64;
+  Tr = 0;
+  models[0] = LoadExtendedModel("objects/harrier/harrier_g0_0.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/ADEN.tga");
+  
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(1.0, 1.0, 1.0, &Ka);
+  SetVector(0.5, 0.5, 0.5, &Ks);
+  Ns = 64;
+  Tr = 0;
+  models[1] = LoadExtendedModel("objects/harrier/harrier_g0_1.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/Camera.tga");
+  
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(1.0, 1.0, 1.0, &Ka);
+  SetVector(0.5, 0.5, 0.5, &Ks);
+  Ns = 64;
+  Tr = 0;
+  models[2] = LoadExtendedModel("objects/harrier/harrier_g0_2.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/SNEB.tga");
+  
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(1.0, 1.0, 1.0, &Ka);
+  SetVector(0.5, 0.5, 0.5, &Ks);
+  Ns = 64;
+  Tr = 0;
+  models[3] = LoadExtendedModel("objects/harrier/harrier_g0_3.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/Tank.tga");
+  
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(1.0, 1.0, 1.0, &Ka);
+  SetVector(0.5, 0.5, 0.5, &Ks);
+  Ns = 64;
+  Tr = 0;
+  models[4] = LoadExtendedModel("objects/harrier/harrier_g0_4.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/Default.tga");
+  
+  SetVector(0.627451, 0.752941, 0.878431, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[5] = LoadExtendedModel("objects/harrier/harrier_g0_0.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/ADEN.tga");
+  
+  return models;
+}
+
 void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag)
 {
-  plane = LoadModelPlus("objects/Harrier-GR.2.obj");
-  
   plane_program = loadShaders("shaders/airplane.vert","shaders/airplane.frag");
-  
   glUseProgram(plane_program);
-  LoadTGATextureSimple("textures/harrier.tga", &planeTex);
+  
+  planeModels = Models_Init();
   
   
-  *thrust = 2;
+  *thrust = 0;
   *yawRate = 0;
   *pitchRate = 0;
   *rollRate = 0;
@@ -121,14 +215,8 @@ void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* posit
   glUniformMatrix4fv(glGetUniformLocation(plane_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
   glUniformMatrix3fv(glGetUniformLocation(plane_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
   
-  // Upload textures
-  glUniform1i(glGetUniformLocation(plane_program, "texUnit"), 0); // Texture unit 1
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, planeTex);
-  
-  // Draw the plane
-  DrawModel(plane, plane_program, "inPosition", "inNormal", "inTexCoord");
-  
+  for(int i = 0; i < modelCount; i++)
+    DrawExtendedModel(planeModels[i], plane_program, "inPosition", "inNormal", "inTexCoord");
 }
 
 void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* mdlMatrix, GLfloat* normalMatrix)
@@ -167,6 +255,30 @@ void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3
 
 void Airplane_FindEdges(GLfloat* front, GLfloat* back, GLfloat* leftWing, GLfloat* rightWing, GLfloat* top, GLfloat* bottom)
 {
-  FindEdges(plane, scaleFactor, front, back, leftWing, rightWing, top, bottom);
+  int i;
+  *bottom = 1e10;
+  *top = 1e-10;
+  *back = 1e10;
+  *front = 1e-10;
+  *leftWing = 1e-10;
+  *rightWing = 1e10;
+  for (i = 0; i < planeModels[4]->model->numVertices; i++)
+  {
+    if (planeModels[4]->model->vertexArray[3 * i] < *back) *back = planeModels[4]->model->vertexArray[3 * i]; //xmin
+    if (planeModels[4]->model->vertexArray[3 * i] > *front) *front = planeModels[4]->model->vertexArray[3 * i]; //xmax
+    if (planeModels[4]->model->vertexArray[3 * i+1] < *bottom) *bottom = planeModels[4]->model->vertexArray[3 * i+1]; //ymin
+    if (planeModels[4]->model->vertexArray[3 * i+1] > *top) *top = planeModels[4]->model->vertexArray[3 * i+1]; //ymax
+    if (planeModels[4]->model->vertexArray[3 * i+2] < *rightWing) *rightWing = planeModels[4]->model->vertexArray[3 * i+2]; //zmin
+    if (planeModels[4]->model->vertexArray[3 * i+2] > *leftWing) *leftWing = planeModels[4]->model->vertexArray[3 * i+2]; //zmax
+  }
+
+  // Scale according to scale factor
+  *bottom = *bottom * scaleFactor;
+  *top = *top * scaleFactor;
+  *back = *back * scaleFactor;
+  *front = *front * scaleFactor;
+  *leftWing = *leftWing * scaleFactor;
+  *rightWing = *rightWing * scaleFactor;
+
 }
 	

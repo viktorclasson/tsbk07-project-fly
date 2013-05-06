@@ -9,6 +9,7 @@ void main(void)
 {
 const vec3 light = vec3(0.58, 0.58, 0.58);
 float shade = clamp(clamp(dot(normalize(fragNormal), light),0,1) + 0.5, 0, 1);
+vec2 invTexCoord = vec2(fragTexCoord.s, fragTexCoord.t);
 vec4 texColor = texture(texUnit, fragTexCoord);
 out_Color = texColor*shade;
 //out_Color = vec4(0.7, 0.1, 0.3, 1.0)*shade;
