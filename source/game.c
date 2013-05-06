@@ -26,7 +26,7 @@ GLfloat targetAngle[numTargets]; // Angle wrt the y-axis
 GLfloat currentAngle; // Current target angle
 GLfloat sf;
 int currentTarget;
-GLfloat xmax, xmin, zmax, zmin, ymax, ymin;
+GLfloat xmax, xmin, zmax, zmin, ymax, ymin, maxRadius;
 
 // Matrices
 GLfloat projMatrix[16];
@@ -35,36 +35,40 @@ void Game_FindTargetBoundries(void)
 {
   // Get boundries
   FindEdges(target, sf, &xmax, &xmin, &ymax, &ymin, &zmax, &zmin);
+  maxRadius = fmax(xmax-xmin, ymax-ymin);
+  maxRadius = fmax(maxRadius, zmax-zmin);
+  maxRadius /= 4;
+
   // Calculate boundries in world
-  xmax = xmax + currentPosition.x;
-  xmin = xmin + currentPosition.x;
-  zmax = zmax + currentPosition.z;
-  zmin = zmin + currentPosition.z;
-  ymax = ymax + currentPosition.y;
-  ymin = ymin + currentPosition.y;
+  xmax = currentPosition.x + maxRadius;
+  xmin = currentPosition.x - maxRadius;
+  zmax = currentPosition.z + maxRadius;
+  zmin = currentPosition.z - maxRadius;
+  ymax = currentPosition.y + maxRadius;
+  ymin = currentPosition.y - maxRadius;
 }
 
 void Game_PlaceTargets(void)
 {
-  SetVector(50,140,100,&targetPosition[0]);
+  SetVector(50,140,600,&targetPosition[0]);
   targetAngle[0] = 0;
-  SetVector(50,160,150,&targetPosition[1]);
+  SetVector(50,160,650,&targetPosition[1]);
   targetAngle[1] = 0.1;
-  SetVector(60,160,300,&targetPosition[2]);
+  SetVector(60,160,800,&targetPosition[2]);
   targetAngle[2] = -M_PI*0.15;
-  SetVector(80,150,350,&targetPosition[3]);
+  SetVector(80,150,850,&targetPosition[3]);
   targetAngle[3] = -M_PI*0.20;
-  SetVector(100,150,400,&targetPosition[4]);
+  SetVector(100,150,900,&targetPosition[4]);
   targetAngle[4] = -M_PI*0.25;
-  SetVector(130,150,430,&targetPosition[5]);
+  SetVector(130,150,930,&targetPosition[5]);
   targetAngle[5] = -M_PI*0.30;
-  SetVector(160,160,450,&targetPosition[6]);
+  SetVector(160,160,950,&targetPosition[6]);
   targetAngle[6] = -M_PI*0.35;
-  SetVector(180,160,470,&targetPosition[7]);
+  SetVector(180,160,970,&targetPosition[7]);
   targetAngle[7] = -M_PI*0.40;
-  SetVector(210,150,500,&targetPosition[8]);
+  SetVector(210,150,1000,&targetPosition[8]);
   targetAngle[8] = -M_PI*0.45;
-  SetVector(270,150,500,&targetPosition[9]);
+  SetVector(270,150,1000,&targetPosition[9]);
   targetAngle[9] = -M_PI*0.5;
 }
 

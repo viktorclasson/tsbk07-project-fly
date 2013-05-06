@@ -28,7 +28,7 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
   LoadTGATextureSimple("textures/harrier.tga", &planeTex);
   
   
-  *thrust = 0;
+  *thrust = 2;
   *yawRate = 0;
   *pitchRate = 0;
   *rollRate = 0;
@@ -42,9 +42,9 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
 
 void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag)
 {
-  GLfloat pitchModifier = 0.010;
-  GLfloat rollModifier = 0.02;
-  GLfloat yawModifier = 0.005;
+  GLfloat pitchModifier = 0.0025;
+  GLfloat rollModifier = 0.01;
+  GLfloat yawModifier = 0.001;
   GLfloat thrustModifier = 0.05;
   
   if(keyIsDown('w')) // pitch up
@@ -91,7 +91,7 @@ void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GL
   }
   else if(keyIsDown('v')) //decrease thust
   {
-    *thrust = *thrust - thrustModifier;
+    *thrust = fmax(*thrust - thrustModifier,0);
   }
   
   if(keyIsDown('1')) //set first person view
