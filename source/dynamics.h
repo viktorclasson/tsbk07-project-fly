@@ -13,11 +13,17 @@
 
 #include "utils/VectorUtils2.h"
 
-#define pAlpha 0.90
-#define rAlpha 0.90
-#define yAlpha 0.90
-#define maxVelocity 30 // Maxhastighet
-#define thrustRespons 20 // Lutningen på hastighetskurvan, lägre värde ger brantare lutning initalt
+#define pitchAlpha 0.90 // Higher value gives slower fade out
+#define pitchBackLimit M_PI/10 // Limit for when airplane should pitch back autonomously
+#define pitchBackModifier 0.025 // Higher value gives faster pitch back
+#define rollAlpha 0.90 // Higer values gives slower fader out
+#define rollBackLimit M_PI/10 // Limit for when airplane should pitch back autonomously
+#define rollBackModifier 0.025 // Higher value gives faster pitch back
+#define yawAlpha 0.90
+#define AngVelEpsilon 0.001 // Just a small angle velocity value
+#define AngleEpsilon 0.001 // Just a small angle value
+#define maxVelocity 30 // Max translation velocity for airplane
+#define thrustRespons 20 // Lower value gives a steeper velocity respons on thrust for low thrust values
 
 void Dynamics_Init(Point3D* forward, Point3D* up, Point3D* right, 
 		   Point3D* position, GLfloat* velocity);

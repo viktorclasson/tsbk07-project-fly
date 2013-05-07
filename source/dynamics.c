@@ -8,9 +8,8 @@ GLfloat yaw, pitch, roll;
 // Varibles to handle falling
 GLfloat fallSpeed;
 
-// Variables to handle automatic pitch/roll back
-int pitchBack, rollBack;
-GLfloat pitchArtif, rollArtif;
+// State machine
+int pitchState, rollState;
 
 int sign(GLfloat x)
 {
@@ -36,10 +35,11 @@ void Dynamics_Init(Point3D* forward, Point3D* up, Point3D* right,
   // Set inital angle velocities
   yawSpeed = 0; pitchSpeed = 0; rollSpeed = 0;
 
-  // Set flags for pitch and roll back
-  pitchBack = 0; rollBack = 0;
-
+  // Inititate fall speed
   fallSpeed = 0.01;
+
+  // Inititate state machine
+  pitchState = 0, rollState;
 }
 
 void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput, 
@@ -47,39 +47,54 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
 {
     GLfloat pitchMat[16], yawMat[16], rollMat[16];
     
-    /* ******* HANDLE PITCH  ******* */       
-    // User input, set sign of input and cancel pitch back 
+    /* ----- STATE MACHINE -----
+       0 = normal: no pitch, no pitch velocity
+       1 = user input:
+       2 = delay: no user input
+       3 = pitch back: enter when pitch velocity is small, exit when pitch is small
+       4 = correcting: enter pitch is small, exit when angle is zero
+    */
+
+    /* --------------- HANDLE PITCH --------------- */
+
+    // Update state
     if(pitchInput) {
-	pitchDir = sign(pitchInput);
-	pitchBack = 0;
-      }
-    // Pitch angle is not small and no pitch rate, start pitch back 
-    else if(fabs(pitch) > 0.01 && pitchSpeed == 0)
-      {
-	pitchBack = 1;
-      }
-    // Pitch angle is small, stop pitch back
-    else if(fabs(pitch) < 0.01) {
-      pitchBack = 0;
+      pitchState = 1;
+      pitchDir = sign(pitchInput);
     }
-    
-    // Dynamic pitch speed
-    if(fabs(pitchSpeed) > 0.001 || pitchInput || pitchBack) {
-      // Set pitch speed after pitch back
-      if(pitchBack) {
-	pitchSpeed = -sign(pitch)*fabs(pAlpha*pitchSpeed - pitch*0.005*pitchBack);
-      }
-      // Set pitch speed after user input (user input could be zero)
-      else {
-	pitchSpeed = pitchDir*fabs(pAlpha*pitchSpeed + pitchInput);
-      }
+    else if(pitchState == 1 && !pitchInput) {
+      pitchState = 2;
     }
-    else {
-      pitchSpeed = 0;
-      pitchBack = 0;
+    else if(pitchState == 2 && fabs(pitchSpeed) < AngVelEpsilon && fabs(pitch) < pitchBackLimit) {
+      pitchState = 3;
+    }
+    else if(pitchState == 3 && fabs(pitch) < AngleEpsilon) {
+      pitchState = 4;
+    }
+    else if(pitchState == 4 && !pitch) {
+      pitchState = 0;
     }
 
-    // Accumulate pitch angle
+    // Update pitch speed depning on state
+    switch (pitchState) {
+    case 0:
+      pitchSpeed = 0;
+      break;
+    case 1:
+      pitchSpeed = pitchDir*fabs(pitchAlpha*pitchSpeed + pitchInput);
+      break;
+    case 2:
+      pitchSpeed = pitchDir*fabs(pitchAlpha*pitchSpeed);
+      break;
+    case 3:
+      pitchSpeed = -sign(pitch)*fabs(pitchAlpha*pitchSpeed + pitch*pitchBackModifier);
+      break;
+    case 4:
+      pitchSpeed = -pitch;
+      break;
+    }
+
+    // Accumulate pitch
     pitch += pitchSpeed;
 
     // Create matrix to rotate around right-vector
@@ -88,9 +103,7 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
     // Update forward and right matrix
     MatrixMultPoint3D(pitchMat, forward, forward);
     MatrixMultPoint3D(pitchMat, up, up);
-    
-    printf("Pitch: %f, Pitch back: %d, Pitch rate: %f, Pitch input: %f, Artifical input: %f\n", 
-	   pitch, pitchBack, pitchSpeed, pitchInput, pitchArtif);
+
 
     /* ******* HANDLE YAW  ******* */
 
@@ -99,8 +112,8 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
       yawDir = sign(yawInput);
 
     // Update pitch speed
-    if(yawSpeed > 0.001 || yawInput)
-      yawSpeed = yawDir*fabs(pAlpha*yawSpeed + yawInput);
+    if(yawSpeed > AngVelEpsilon || yawInput)
+      yawSpeed = yawDir*fabs(yawAlpha*yawSpeed + yawInput);
     else
       yawSpeed = 0;
 
@@ -116,35 +129,39 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
 
     /* ******* HANDLE ROLL  ******* */
 
-    // User input, set sign of input and cancel roll back 
     if(rollInput) {
-	rollDir = sign(rollInput);
-	rollBack = 0;
-      }
-    // Roll angle is not small and no roll rate, start roll back 
-    else if(fabs(roll) > 0.01 && rollSpeed == 0)
-      {
-	rollBack = 1;
-      }
-    // Roll angle is small, stop roll back
-    else if(fabs(roll) < 0.01) {
-      rollBack = 0;
+      rollState = 1;
+      rollDir = sign(rollInput);
     }
-    
-    // Dynamic roll speed
-    if(fabs(rollSpeed) > 0.001 || rollInput || rollBack) {
-      // Set roll speed after roll back
-      if(rollBack) {
-	rollSpeed = -sign(roll)*fabs(pAlpha*rollSpeed - roll*0.005*rollBack);
-      }
-      // Set roll speed after user input (user input could be zero)
-      else {
-	rollSpeed = rollDir*fabs(pAlpha*rollSpeed + rollInput);
-      }
+    else if(rollState == 1 && !rollInput) {
+      rollState = 2;
     }
-    else {
+    else if(rollState == 2 && fabs(rollSpeed) < AngVelEpsilon && fabs(roll) < rollBackLimit) {
+      rollState = 3;
+    }
+    else if(rollState == 3 && fabs(roll) < AngleEpsilon) {
+      rollState = 4;
+    }
+    else if(rollState == 4 && !roll) {
+      rollState = 0;
       rollSpeed = 0;
-      rollBack = 0;
+    }
+
+    switch (rollState) {
+    case 0:
+      break;
+    case 1:
+      rollSpeed = rollDir*fabs(rollAlpha*rollSpeed + rollInput);
+      break;
+    case 2:
+      rollSpeed = rollDir*fabs(rollAlpha*rollSpeed);
+      break;
+    case 3:
+      rollSpeed = -sign(roll)*fabs(rollAlpha*rollSpeed + roll*rollBackModifier);
+      break;
+    case 4:
+      rollSpeed = -roll;
+      break;
     }
 
     // Accumulate roll angle
@@ -155,7 +172,14 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
 		
     // Update forward and right matrix
     MatrixMultPoint3D(rollMat, up, up);
-    MatrixMultPoint3D(rollMat, right, right);    
+    MatrixMultPoint3D(rollMat, right, right);
+
+    /*
+    printf("Pitch: %f, Pitch rate: %f, Pitch input: %f, Pitch state: %d\n", 
+	   pitch, pitchSpeed, pitchInput, pitchState);
+    printf("Roll: %f, Roll rate: %f, Roll input: %f, Roll state: %d\n", 
+	   roll, rollSpeed, rollInput, rollState);
+    */
 }
 
 void Dynamics_CalcPos(GLfloat thrust, Point3D* forward, GLfloat* velocity, Point3D* position)
