@@ -13,6 +13,11 @@
 
 #include "utils/VectorUtils2.h"
 
+#define steadyState 0
+#define userInput 1
+#define smoothTail 2
+#define pitchBack 3
+#define correction 4
 #define pitchAlpha 0.90 // Higher value gives slower fade out
 #define pitchBackLimit M_PI/10 // Limit for when airplane should pitch back autonomously
 #define pitchBackModifier 0.025 // Higher value gives faster pitch back

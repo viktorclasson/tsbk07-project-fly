@@ -59,37 +59,37 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
 
     // Update state
     if(pitchInput) {
-      pitchState = 1;
+      pitchState = userInput;
       pitchDir = sign(pitchInput);
     }
-    else if(pitchState == 1 && !pitchInput) {
-      pitchState = 2;
+    else if(pitchState == userInput && !pitchInput) {
+      pitchState = smoothTail;
     }
-    else if(pitchState == 2 && fabs(pitchSpeed) < AngVelEpsilon && fabs(pitch) < pitchBackLimit) {
-      pitchState = 3;
+    else if(pitchState == smoothTail && fabs(pitchSpeed) < AngVelEpsilon && fabs(pitch) < pitchBackLimit) {
+      pitchState = autoBack;
     }
-    else if(pitchState == 3 && fabs(pitch) < AngleEpsilon) {
-      pitchState = 4;
+    else if(pitchState == autoBack && fabs(pitch) < AngleEpsilon) {
+      pitchState = correction;
     }
-    else if(pitchState == 4 && !pitch) {
-      pitchState = 0;
+    else if(pitchState == correction && !pitch) {
+      pitchState = steadyState;
     }
 
-    // Update pitch speed depning on state
+    // Update pitch speed depending on state
     switch (pitchState) {
-    case 0:
+    case steadyState:
       pitchSpeed = 0;
       break;
-    case 1:
+    case userInput:
       pitchSpeed = pitchDir*fabs(pitchAlpha*pitchSpeed + pitchInput);
       break;
-    case 2:
+    case smoothTail:
       pitchSpeed = pitchDir*fabs(pitchAlpha*pitchSpeed);
       break;
-    case 3:
+    case autoBack:
       pitchSpeed = -sign(pitch)*fabs(pitchAlpha*pitchSpeed + pitch*pitchBackModifier);
       break;
-    case 4:
+    case correction:
       pitchSpeed = -pitch;
       break;
     }
@@ -130,36 +130,36 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
     /* ******* HANDLE ROLL  ******* */
 
     if(rollInput) {
-      rollState = 1;
+      rollState = userInput;
       rollDir = sign(rollInput);
     }
-    else if(rollState == 1 && !rollInput) {
-      rollState = 2;
+    else if(rollState == userInput && !rollInput) {
+      rollState = smoothTail;
     }
-    else if(rollState == 2 && fabs(rollSpeed) < AngVelEpsilon && fabs(roll) < rollBackLimit) {
-      rollState = 3;
+    else if(rollState == smoothTail && fabs(rollSpeed) < AngVelEpsilon && fabs(roll) < rollBackLimit) {
+      rollState = autoBack;
     }
-    else if(rollState == 3 && fabs(roll) < AngleEpsilon) {
-      rollState = 4;
+    else if(rollState == autoBack && fabs(roll) < AngleEpsilon) {
+      rollState = correction;
     }
-    else if(rollState == 4 && !roll) {
-      rollState = 0;
-      rollSpeed = 0;
+    else if(rollState == correction && !roll) {
+      rollState = steadyState;
     }
 
     switch (rollState) {
-    case 0:
+    case steadyState:
+      rollSpeed = 0;
       break;
-    case 1:
+    case userInput:
       rollSpeed = rollDir*fabs(rollAlpha*rollSpeed + rollInput);
       break;
-    case 2:
+    case smoothTail:
       rollSpeed = rollDir*fabs(rollAlpha*rollSpeed);
       break;
-    case 3:
+    case autoBack:
       rollSpeed = -sign(roll)*fabs(rollAlpha*rollSpeed + roll*rollBackModifier);
       break;
-    case 4:
+    case correction:
       rollSpeed = -roll;
       break;
     }
