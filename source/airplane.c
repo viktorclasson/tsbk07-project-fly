@@ -13,11 +13,9 @@ GLfloat scaleFactor = 0.5;
 // Initial rotation for airplane model
 GLfloat initialRotY = -3.14159265358979323846/2;
 
-// Textures
-GLuint planeTex;
-
 // Shaders
-GLuint plane_program;
+GLuint plane_textured_program;
+GLuint plane_untextured_program;
 
 ExtendedModel* LoadExtendedModel(char *name, Point3D *Kd, Point3D *Ka, Point3D *Ks, GLfloat Ns, GLfloat Tr, char *texture)
 {
@@ -45,23 +43,64 @@ ExtendedModel* LoadExtendedModel(char *name, Point3D *Kd, Point3D *Ka, Point3D *
   return m;
 }
 
-void DrawExtendedModel(ExtendedModel *m, GLuint program, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName)
+void DrawExtendedModel(ExtendedModel *m, GLuint untexturedProgram, GLuint texturedProgram, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName)
 {
+  GLfloat ambientLightLevel[3] = { 1.0, 1.0, 1.0 };
+  GLfloat sourceLightLevel[3] = { 1.0, 1.0, 1.0 };
+  GLfloat sourceDirection[3] = { 0.58, 0.58, 0.58 };
+  
+  GLfloat Ka[3] = { m->Ka.x, m->Ka.y, m->Ka.z };
+  GLfloat Kd[3] = { m->Kd.x, m->Kd.y, m->Kd.z };
+  GLfloat Ks[3] = { m->Ks.x, m->Ks.y, m->Ks.z };
+  
+  glUniformMatrix3fv(glGetUniformLocation(plane_untextured_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
+  
   if(m->hasTexture == 1)
   {
+    glUseProgram(texturedProgram);
+    
     // Upload textures
-    glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 1
+    glUniform1i(glGetUniformLocation(texturedProgram, "texUnit"), 0); // Texture unit 0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m->texture);
+    
+    // Upload light and material info
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "ambientLightLevel"), 1, ambientLightLevel);
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "sourceLightLevel"), 1, sourceLightLevel);
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "sourceDirection"), 1, sourceDirection);
+    
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "Ka"), 1, Ka);
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "Kd"), 1, Kd);
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "Ks"), 1, Ks);
+    glUniform1f(glGetUniformLocation(plane_textured_program, "Ns"), m->Ns);
+    glUniform1f(glGetUniformLocation(plane_textured_program, "Tr"), m->Tr);
+    
+    // Draw the plane
+    DrawModel(m->model, texturedProgram, vertexVariableName, normalVariableName, texCoordVariableName);
   }
-  
-  // Draw the plane
-  DrawModel(m->model, program, "inPosition", "inNormal", "inTexCoord");
+  else
+  {
+    glUseProgram(plane_untextured_program);
+    
+    // Upload light and material info
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "ambientLightLevel"), 1, ambientLightLevel);
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "sourceLightLevel"), 1, sourceLightLevel);
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "sourceDirection"), 1, sourceDirection);
+    
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "Ka"), 1, Ka);
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "Kd"), 1, Kd);
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "Ks"), 1, Ks);
+    glUniform1f(glGetUniformLocation(plane_textured_program, "Ns"), m->Ns);
+    glUniform1f(glGetUniformLocation(plane_textured_program, "Tr"), m->Tr);
+    
+    // Draw the plane
+    DrawModel(m->model, untexturedProgram, vertexVariableName, normalVariableName, texCoordVariableName);
+  }
 }
 
 ExtendedModel** Models_Init(void)
 {
-  modelCount = 6;
+  modelCount = 26;
   
   ExtendedModel** models = malloc(sizeof(ExtendedModel*) * modelCount);
   
@@ -102,22 +141,181 @@ ExtendedModel** Models_Init(void)
   SetVector(0.5, 0.5, 0.5, &Ks);
   Ns = 64;
   Tr = 0;
-  models[4] = LoadExtendedModel("objects/harrier/harrier_g0_4.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/Default.tga");
+  models[4] = LoadExtendedModel("objects/harrier/harrier_g0_4.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/USMC.tga");
   
   SetVector(0.627451, 0.752941, 0.878431, &Kd);
   SetVector(0.2, 0.2, 0.2, &Ka);
   SetVector(0.2, 0.2, 0.2, &Ks);
   Ns = 128;
   Tr = 0;
-  models[5] = LoadExtendedModel("objects/harrier/harrier_g0_0.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/ADEN.tga");
+  models[5] = LoadExtendedModel("objects/harrier/harrier_g0_5.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g1_Knobs
+  SetVector(0.627451, 0.752941, 0.878431, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[6] = LoadExtendedModel("objects/harrier/harrier_g1_Knobs_5.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[7] = LoadExtendedModel("objects/harrier/harrier_g1_Knobs_6.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(0.233333, 0.233333, 0.233333, &Kd);
+  SetVector(0, 0, 0, &Ka);
+  SetVector(0.9, 0.9, 0.9, &Ks);
+  Ns = 32;
+  Tr = 0;
+  models[8] = LoadExtendedModel("objects/harrier/harrier_g1_Knobs_7.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(0.8, 0.8, 0.8, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[9] = LoadExtendedModel("objects/harrier/harrier_g1_Knobs_8.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g2
+  SetVector(0.627451, 0.752941, 0.878431, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[10] = LoadExtendedModel("objects/harrier/harrier_g2_5.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[11] = LoadExtendedModel("objects/harrier/harrier_g2_6.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(0.233333, 0.233333, 0.233333, &Kd);
+  SetVector(0, 0, 0, &Ka);
+  SetVector(0.9, 0.9, 0.9, &Ks);
+  Ns = 32;
+  Tr = 0;
+  models[12] = LoadExtendedModel("objects/harrier/harrier_g2_7.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g2_ThrottleLever
+  SetVector(0.233333, 0.233333, 0.233333, &Kd);
+  SetVector(0, 0, 0, &Ka);
+  SetVector(0.9, 0.9, 0.9, &Ks);
+  Ns = 32;
+  Tr = 0;
+  models[13] = LoadExtendedModel("objects/harrier/harrier_g2_ThrottleLever.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g3_VectorLevel
+  SetVector(0.233333, 0.233333, 0.233333, &Kd);
+  SetVector(0, 0, 0, &Ka);
+  SetVector(0.9, 0.9, 0.9, &Ks);
+  Ns = 32;
+  Tr = 0;
+  models[14] = LoadExtendedModel("objects/harrier/harrier_g3_VectorLevel.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g4
+  SetVector(0.627451, 0.752941, 0.878431, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[15] = LoadExtendedModel("objects/harrier/harrier_g4.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g4_Stick
+  SetVector(0.233333, 0.233333, 0.233333, &Kd);
+  SetVector(0, 0, 0, &Ka);
+  SetVector(0.9, 0.9, 0.9, &Ks);
+  Ns = 32;
+  Tr = 0;
+  models[16] = LoadExtendedModel("objects/harrier/harrier_g4_Stick_7.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(1.0, 0.0, 0.0, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[17] = LoadExtendedModel("objects/harrier/harrier_g4_Stick_9.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g5_LPedal
+  SetVector(0.533333, 0.533333, 0.533333, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[18] = LoadExtendedModel("objects/harrier/harrier_g5_LPedal.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g5_RPedal
+  SetVector(0.533333, 0.533333, 0.533333, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[19] = LoadExtendedModel("objects/harrier/harrier_g5_RPedal.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g7
+  SetVector(0.233333, 0.233333, 0.233333, &Kd);
+  SetVector(0, 0, 0, &Ka);
+  SetVector(0.9, 0.9, 0.9, &Ks);
+  Ns = 32;
+  Tr = 0;
+  models[20] = LoadExtendedModel("objects/harrier/harrier_g7_7.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(0.67, 0.88, 0.68, &Kd);
+  SetVector(0.67, 0.88, 0.68, &Ka);
+  SetVector(1.0, 1.0, 1.0, &Ks);
+  Ns = 128;
+  Tr = 0.8;
+  models[21] = LoadExtendedModel("objects/harrier/harrier_g7_11.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(0.454902, 0.521569, 0.454902, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0;
+  models[22] = LoadExtendedModel("objects/harrier/harrier_g7_12.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  //harrier_g7_group
+  /*
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(1.0, 1.0, 1.0, &Ka);
+  SetVector(0.5, 0.5, 0.5, &Ks);
+  Ns = 64;
+  Tr = 0;
+  models[23] = LoadExtendedModel("objects/harrier/harrier_g7_group_13.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/reflection.tga");
+  */
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(1.0, 1.0, 1.0, &Ka);
+  SetVector(0.5, 0.5, 0.5, &Ks);
+  Ns = 64;
+  Tr = 0;
+  models[23] = LoadExtendedModel("objects/harrier/harrier_g7_group_13.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
+  
+  SetVector(1.0, 1.0, 1.0, &Kd);
+  SetVector(1.0, 1.0, 1.0, &Ka);
+  SetVector(0.5, 0.5, 0.5, &Ks);
+  Ns = 64;
+  Tr = 0;
+  models[24] = LoadExtendedModel("objects/harrier/harrier_g7_group_14.obj", &Kd, &Ka, &Ks, Ns, Tr, "textures/harrier/Pilot.tga");
+  
+  //harrier_g8
+  SetVector(0.8, 0.8, 0.8, &Kd);
+  SetVector(0.2, 0.2, 0.2, &Ka);
+  SetVector(0.2, 0.2, 0.2, &Ks);
+  Ns = 128;
+  Tr = 0.902;
+  models[25] = LoadExtendedModel("objects/harrier/harrier_g8.obj", &Kd, &Ka, &Ks, Ns, Tr, NULL);
   
   return models;
 }
 
 void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag)
 {
-  plane_program = loadShaders("shaders/airplane.vert","shaders/airplane.frag");
-  glUseProgram(plane_program);
+  plane_textured_program = loadShaders("shaders/airplane_textured.vert","shaders/airplane_textured.frag");
+  plane_untextured_program = loadShaders("shaders/airplane_untextured.vert","shaders/airplane_untextured.frag");
   
   planeModels = Models_Init();
   
@@ -209,14 +407,18 @@ void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* posit
   // Calculate complete model matrix and normal matrix(camera and projection applied here, no need to calculate for every vertex on GPU)
   Airplane_CalcMatrices(forward, up, right, position, camMatrix, mdlMatrix, normalMatrix);
   
-  glUseProgram(plane_program);
+  // Upload model and normal matrices to both programs
+  glUseProgram(plane_textured_program);
+  glUniformMatrix4fv(glGetUniformLocation(plane_textured_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
+  glUniformMatrix3fv(glGetUniformLocation(plane_textured_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
   
-  // Upload model and normal matrices
-  glUniformMatrix4fv(glGetUniformLocation(plane_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
-  glUniformMatrix3fv(glGetUniformLocation(plane_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
+  glUseProgram(plane_untextured_program);
+  glUniformMatrix4fv(glGetUniformLocation(plane_untextured_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
+  glUniformMatrix3fv(glGetUniformLocation(plane_untextured_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
   
+  // Draw all models
   for(int i = 0; i < modelCount; i++)
-    DrawExtendedModel(planeModels[i], plane_program, "inPosition", "inNormal", "inTexCoord");
+    DrawExtendedModel(planeModels[i], plane_untextured_program, plane_textured_program, "inPosition", "inNormal", "inTexCoord");
 }
 
 void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* mdlMatrix, GLfloat* normalMatrix)

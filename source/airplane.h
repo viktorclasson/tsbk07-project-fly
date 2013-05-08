@@ -28,7 +28,7 @@ typedef struct
 } ExtendedModel;
 
 ExtendedModel* LoadExtendedModel(char *name, Point3D *Kd, Point3D *Ka, Point3D *Ks, GLfloat Ns, GLfloat Tr, char *texture);
-void DrawExtendedModel(ExtendedModel *m, GLuint program, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName);
+void DrawExtendedModel(ExtendedModel *m, GLuint untexturedProgram, GLuint texturedProgram, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName);
 
 void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag);
 void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloat* rollRate, GLuint* firstPersonView, GLuint* resetFlag);
