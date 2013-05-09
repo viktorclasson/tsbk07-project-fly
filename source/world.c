@@ -102,7 +102,7 @@ GLfloat World_GetHeight(GLfloat x, GLfloat z)
   GLfloat y = abs((sin(x/600)*sin(z/400)*100)+(5.0*sin(z/100.0-0.5)*2.0*sin(x/40.0)))-1.5;
   int integer = 70;
   if (y>integer)
-    y=y*pow(y-integer+1,0.6*sin(x/1000)*sin(z/5000));
+    y=y*pow(y-integer+1,0.4*sin(x/1000)*sin(z/5000));
   if (y < 1)
     y=0.999;
   return y;

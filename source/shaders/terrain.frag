@@ -24,7 +24,6 @@ void main(void)
   outColor = outColor*texture(tex, texCoord) + vec4(0.2, 0.2, 0.2, 1.0);
   if (worldPosition.y > 50)
   {
-    //outColor = outColor*texture(tex, texCoord)*vec4(0.8,0.6,1.4,1.0) + vec4(0.2, 0.2, 0.2, 1.0);
     outColor = (0.5*outColor)*(4.0*texture(texMountain, texCoord)) + vec4(0.2, 0.2, 0.2, 1.0);
   }
   if (worldPosition.y < 1)
@@ -36,29 +35,40 @@ void main(void)
     vec2 reflectionTex;
     reflectionTex.x=(reflectionDir.x+1)/2.0;
     reflectionTex.y=(reflectionDir.z+1)/2.0;
-    // Recalculate for the white triangles, can maybe be improved by another if in the if's to check which triangle you're in.
+    // Recalculate for the white areas in the skybox texture
     //    Bottom right
     if(reflectionTex.x > 0.75 && reflectionTex.y > 0.75)
     {
-      reflectionTex.x = 0.75; //reflectionTex.y = 0.75;
+      if(reflectionTex.x > reflectionTex.y)
+	reflectionTex.x = 0.75;
+      else
+	reflectionTex.y = 0.75;
     }
     //    Some other triangle
     if(reflectionTex.x > 0.75 && reflectionTex.y < 0.25)
     {
-      reflectionTex.y = 0.25; //reflectionTex.y = 0.25;
+      if(reflectionTex.x > 1-reflectionTex.y)
+	reflectionTex.y = 0.25;
+      else
+	reflectionTex.x = 0.75; 
     }
     //    Some other triangle
     if(reflectionTex.x < 0.25 && reflectionTex.y < 0.25)
     {
-      reflectionTex.x = 0.25; //reflectionTex.y = 0.25;
+      if(reflectionTex.x > reflectionTex.y)
+	reflectionTex.x = 0.25; 
+      else
+	reflectionTex.y = 0.25;
     }
     //    Some other triangle
     if(reflectionTex.x < 0.25 && reflectionTex.y > 0.75)
     {
-      reflectionTex.y = 0.75; //reflectionTex.y = 0.75;
+      if(1-reflectionTex.x > reflectionTex.y)
+	reflectionTex.y = 0.75;
+      else
+	reflectionTex.x = 0.25; 
     }
-    outColor = texture(skybox_tex, reflectionTex);
-    //outColor = outColor*texture(tex, texCoord)*vec4(0.5,0.5,0.5,1.0)+ vec4(0.15,0.15,0.8,1.0) + vec4(0.2, 0.2, 0.2, 1.0);
+    outColor = 0.2*outColor+0.8*texture(skybox_tex, reflectionTex);
   }
   
 }
