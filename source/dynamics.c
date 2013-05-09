@@ -96,6 +96,7 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
 
     // Accumulate pitch
     pitch += pitchSpeed;
+    pitch = fmod(pitch,M_PI);
 
     // Create matrix to rotate around right-vector
     ArbRotate(right, pitchSpeed, pitchMat);
@@ -166,6 +167,7 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
 
     // Accumulate roll angle
     roll += rollSpeed;
+    roll = fmod(roll,M_PI);
 
     // Create matrix to rotate around forward-vector
     ArbRotate(forward, rollSpeed, rollMat);
@@ -174,12 +176,12 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
     MatrixMultPoint3D(rollMat, up, up);
     MatrixMultPoint3D(rollMat, right, right);
 
-    /*
+    
     printf("Pitch: %f, Pitch rate: %f, Pitch input: %f, Pitch state: %d\n", 
 	   pitch, pitchSpeed, pitchInput, pitchState);
     printf("Roll: %f, Roll rate: %f, Roll input: %f, Roll state: %d\n", 
 	   roll, rollSpeed, rollInput, rollState);
-    */
+    
 }
 
 void Dynamics_CalcPos(GLfloat thrust, Point3D* forward, GLfloat* velocity, Point3D* position)
@@ -192,10 +194,11 @@ void Dynamics_CalcPos(GLfloat thrust, Point3D* forward, GLfloat* velocity, Point
 	VectorAdd(position, &movment, position);
 
 	// Check lift
-	if (*velocity < 2.5)
+	if (*velocity < liftLimit)
 	  {
 	    position->y -= fallSpeed;
-	    fallSpeed += 0.05*fallSpeed;
+	    fallSpeed += fallSpeed/(*velocity+fallSpeedModifier);
 	  }
 }
+
 

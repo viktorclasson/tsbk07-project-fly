@@ -8,6 +8,7 @@
 #endif
 
 #include <time.h>
+#include <math.h>
 
 #include "utils/VectorUtils2.h"
 #include "utils/GL_utilities.h"

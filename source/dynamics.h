@@ -26,9 +26,11 @@
 #define rollBackModifier 0.025 // Higher value gives faster pitch back
 #define yawAlpha 0.90
 #define AngVelEpsilon 0.001 // Just a small angle velocity value
-#define AngleEpsilon 0.001 // Just a small angle value
+#define AngleEpsilon 0.005 // Just a small angle value
 #define maxVelocity 30 // Max translation velocity for airplane
 #define thrustRespons 20 // Lower value gives a steeper velocity respons on thrust for low thrust values
+#define liftLimit 5 // Lower limit on velocity, flying slower will make the plane fall
+#define fallSpeedModifier 20// Lower value gives faster accleration of fall speed
 
 void Dynamics_Init(Point3D* forward, Point3D* up, Point3D* right, 
 		   Point3D* position, GLfloat* velocity);

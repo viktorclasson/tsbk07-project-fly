@@ -101,7 +101,7 @@ void Game_Init(void)
   Game_FindTargetBoundries();
 
   // Projection
-  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 2000.0, projMatrix);
+  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 1000000.0, projMatrix);
   
 }
 
@@ -192,7 +192,7 @@ void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos)
   S(sf, sf, sf, scale);
   T(currentPosition.x, currentPosition.y, currentPosition.z, trans);
   Ry(currentAngle, rot);
-  Rx(3.141592/2, iniRot);
+  Rx(M_PI_2, iniRot);
   IdentityMatrix(mdlMatrix);
   Mult(scale, mdlMatrix, mdlMatrix);
   Mult(iniRot, mdlMatrix, mdlMatrix);
@@ -213,7 +213,7 @@ void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos)
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, targetTex);
   
-  // Draw the plane
+  // Draw the target
   DrawModel(target, target_program, "inPosition", "inNormal", "inTexCoord");
 
 }
