@@ -98,39 +98,33 @@ void display(void)
       Camera_Update(firstPersonView, &forward, &up, &position, velocity, &camera_position, &camera_look, camMatrix);
       
       printError("pre display");
-
+      
       // clear the screen
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
       // Draw ground and skybox
       World_Draw(&camera_position, &camera_look, camMatrix, &position, &up, firstPersonView);
-	  
+      
       // Check for collision
       Game_CollisionDetection(&position, &forward, &up, &right);
-	  
+      
       // The game loop
       Game_Loop(position);
       
       // Draw airplane
-      Airplane_Draw(&forward, &up, &right, &position, camMatrix);
-	  
-	  // The game loop
-	  Game_Loop(position);
-
-	  // Draw airplane
-	  Airplane_Draw(&forward, &up, &right, &position, &camera_position, camMatrix);
-	  
+      Airplane_Draw(&forward, &up, &right, &position, &camera_position, camMatrix);
+      
       // Reset game?
       if(resetFlag == 1)
-	{
-	  Game_Reset(&forward, &up, &right, &position, &velocity, &thrust, &yawRate, &pitchRate, &rollRate, 
-		     &firstPersonView, &resetFlag, &camera_position, &camera_look, camMatrix);
-	}
+      {
+	Game_Reset(&forward, &up, &right, &position, &velocity, &thrust, &yawRate, &pitchRate, &rollRate, 
+		   &firstPersonView, &resetFlag, &camera_position, &camera_look, camMatrix);
+      }
     }
-	
-  printError("display");
-
-  glutSwapBuffers();
+    
+    printError("display");
+    
+    glutSwapBuffers();
 }
 
 void OnTimer(int value)
