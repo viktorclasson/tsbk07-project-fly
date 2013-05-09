@@ -43,17 +43,20 @@ ExtendedModel* LoadExtendedModel(char *name, Point3D *Kd, Point3D *Ka, Point3D *
   return m;
 }
 
-void DrawExtendedModel(ExtendedModel *m, GLuint untexturedProgram, GLuint texturedProgram, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName)
+void DrawExtendedModel(ExtendedModel *m, Point3D* camPosition, GLuint untexturedProgram, GLuint texturedProgram, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName)
 {
+  // Light source data
   GLfloat ambientLightLevel[3] = { 1.0, 1.0, 1.0 };
   GLfloat sourceLightLevel[3] = { 1.0, 1.0, 1.0 };
-  GLfloat sourceDirection[3] = { 0.58, 0.58, 0.58 };
+  GLfloat sourceDirection[3] = { -0.654951, 0.680844, 0.327942  };
   
+  // Prepare material data for upload
   GLfloat Ka[3] = { m->Ka.x, m->Ka.y, m->Ka.z };
   GLfloat Kd[3] = { m->Kd.x, m->Kd.y, m->Kd.z };
   GLfloat Ks[3] = { m->Ks.x, m->Ks.y, m->Ks.z };
   
-  glUniformMatrix3fv(glGetUniformLocation(plane_untextured_program, "normalMatrix"), 1, GL_TRUE, normalMatrix);
+  // Prepare camera position for upload
+  GLfloat camPos[3] = { camPosition->x, camPosition->y, camPosition->z };
   
   if(m->hasTexture == 1)
   {
@@ -64,7 +67,7 @@ void DrawExtendedModel(ExtendedModel *m, GLuint untexturedProgram, GLuint textur
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m->texture);
     
-    // Upload light and material info
+    // Upload light, material and camera info
     glUniform3fv(glGetUniformLocation(plane_textured_program, "ambientLightLevel"), 1, ambientLightLevel);
     glUniform3fv(glGetUniformLocation(plane_textured_program, "sourceLightLevel"), 1, sourceLightLevel);
     glUniform3fv(glGetUniformLocation(plane_textured_program, "sourceDirection"), 1, sourceDirection);
@@ -74,6 +77,8 @@ void DrawExtendedModel(ExtendedModel *m, GLuint untexturedProgram, GLuint textur
     glUniform3fv(glGetUniformLocation(plane_textured_program, "Ks"), 1, Ks);
     glUniform1f(glGetUniformLocation(plane_textured_program, "Ns"), m->Ns);
     glUniform1f(glGetUniformLocation(plane_textured_program, "Tr"), m->Tr);
+    
+    glUniform3fv(glGetUniformLocation(plane_textured_program, "camPosition"), 1, camPos);
     
     // Draw the plane
     DrawModel(m->model, texturedProgram, vertexVariableName, normalVariableName, texCoordVariableName);
@@ -402,7 +407,7 @@ void Airplane_Keyboard(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GL
 }
 
 
-void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix)
+void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, Point3D* camPosition, GLfloat* camMatrix)
 {
   // Calculate complete model matrix and normal matrix(camera and projection applied here, no need to calculate for every vertex on GPU)
   Airplane_CalcMatrices(forward, up, right, position, camMatrix, mdlMatrix, normalMatrix);
@@ -418,7 +423,7 @@ void Airplane_Draw(Point3D* forward, Point3D* up, Point3D* right, Point3D* posit
   
   // Draw all models
   for(int i = 0; i < modelCount; i++)
-    DrawExtendedModel(planeModels[i], plane_untextured_program, plane_textured_program, "inPosition", "inNormal", "inTexCoord");
+    DrawExtendedModel(planeModels[i], camPosition, plane_untextured_program, plane_textured_program, "inPosition", "inNormal", "inTexCoord");
 }
 
 void Airplane_CalcMatrices(Point3D* forward, Point3D* up, Point3D* right, Point3D* position, GLfloat* camMatrix, GLfloat* mdlMatrix, GLfloat* normalMatrix)

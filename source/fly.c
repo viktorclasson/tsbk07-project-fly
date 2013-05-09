@@ -43,12 +43,14 @@ void init(void)
 {	
   dumpInfo();
 
-  // GL inits
-  glClearColor(1,1,1,0);;
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_CULL_FACE);
-  printError("GL inits");
+	// GL inits
+	glClearColor(1,1,1,0);;
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	printError("GL inits");
 
   // Airplane
   Dynamics_Init(&forward, &up, &right, &position, &velocity);
@@ -112,8 +114,11 @@ void display(void)
       // Draw airplane
       Airplane_Draw(&forward, &up, &right, &position, camMatrix);
 	  
-      // Draw target
-      Game_DrawTarget(camMatrix, &camera_position);
+	  // The game loop
+	  Game_Loop(position);
+
+	  // Draw airplane
+	  Airplane_Draw(&forward, &up, &right, &position, &camera_position, camMatrix);
 	  
       // Reset game?
       if(resetFlag == 1)

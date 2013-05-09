@@ -198,6 +198,7 @@ void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos)
   Mult(iniRot, mdlMatrix, mdlMatrix);
   Mult(rot, mdlMatrix, mdlMatrix);
   Mult(trans, mdlMatrix, mdlMatrix);
+  
 
 
   // Upload matrices
@@ -206,7 +207,10 @@ void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos)
   glUniformMatrix4fv(glGetUniformLocation(target_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
   glUniformMatrix4fv(glGetUniformLocation(target_program, "camMatrix"), 1, GL_TRUE, camMatrix);
   glUniformMatrix4fv(glGetUniformLocation(target_program, "projMatrix"), 1, GL_TRUE, projMatrix);
-  glUniform3fv(glGetUniformLocation(target_program, "camera_position"), 1, &cameraPos->z); 
+  
+  // Prepare camera position and upload it
+  GLfloat camPos[3] = { cameraPos->x, cameraPos->y, cameraPos->z };
+  glUniform3fv(glGetUniformLocation(target_program, "camera_position"), 1, camPos); 
 
   // Upload textures
   glUniform1i(glGetUniformLocation(target_program, "texUnit"), 0); // Texture unit 1
