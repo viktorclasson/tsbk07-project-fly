@@ -14,11 +14,7 @@
 #include "loadobj.h"
 #include "LoadTGA2.h"
 
-// Heightmap, the heightmap is the height of objects that are around the point defined in Heightmap[1-2][513]
-float Heightmap[512][513];
-
+// Generate the terrain, this function is not so big anymore since much is moved to the shader
 Model* GenerateTerrain(TextureData *tex);
-
-void GenerateHeightmap(float *temp);
 
 #endif

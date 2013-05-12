@@ -50,21 +50,13 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   z_old=camera_position->z;
   //    Infinite frustum
   frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 10000000000000000.0, worldprojMatrix);
-  // Debug
-  printf("%f %f %f %f \n %f %f %f %f \n %f %f %f %f \n %f %f %f %f \n",
-         worldprojMatrix[0],worldprojMatrix[1], worldprojMatrix[2],worldprojMatrix[3],
-         worldprojMatrix[4],worldprojMatrix[5], worldprojMatrix[6],worldprojMatrix[7],
-         worldprojMatrix[8],worldprojMatrix[9], worldprojMatrix[10],worldprojMatrix[11],
-         worldprojMatrix[12],worldprojMatrix[13], worldprojMatrix[14],worldprojMatrix[15]);
-         
- 
+
   // Sky
   skybox = LoadModelPlus("objects/skybox.obj");
   sky_program = loadShaders("shaders/skybox.vert","shaders/skybox.frag");
   glUseProgram(sky_program);
   LoadTGATextureSimple("textures/SkyBox512.tga", &skytex);
   glUniformMatrix4fv(glGetUniformLocation(sky_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
- 
   glUniform1i(glGetUniformLocation(sky_program, "texUnit"), 3); // Texture unit 3
 	  
   // Trees
@@ -81,8 +73,6 @@ void World_Init(Point3D* camera_position, Point3D* camera_look)
   glUseProgram(terrain_program);
   printError("init shader");
 
-  // Is this really needed here? /Fredrik
-  // It don't work without it. /Viktor
   glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projMatrix"), 1, GL_TRUE, worldprojMatrix);
 
   glUniform1i(glGetUniformLocation(terrain_program, "tex"), 5); // Texture unit 5
@@ -110,21 +100,14 @@ GLfloat World_GetHeight(GLfloat x, GLfloat z)
 
 void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatrix, Point3D* position, Point3D* plane_up, GLuint firstPersonView)
 {
-	// For time debugging
-	struct timespec t1,t2,t3,t4;
-	// For time critical debugging
-	clock_gettime(CLOCK_REALTIME, &t3);
-  
 	GLfloat modelView[16];
        
         printError("pre display");
        
         // Skybox
         GLfloat sky_cameraMatrix[16];
-	//printf("First person: %d \n plane_up %f %f %f \n",firstPersonView,plane_up->x,plane_up->y,plane_up->z);
-	//printf("Absolute value: %f \n", sqrt(powf(plane_up->x,2) + powf(plane_up->y,2) + powf(plane_up->z,2)));
 	Point3D yhat = {0,1,0};
-	//printf("Yhat: %f %f %f\n",yhat.x,yhat.y,yhat.z);
+	
 	if(firstPersonView == 1) // Equals to first persion view!
 	{
 	  // The plane_up is the new yhat of the world => calculate that camMatrix
@@ -147,8 +130,6 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	  sky_cameraMatrix[11] = 0.0;
 	}
 	
-	//printf("Cam mult yhat: %f %f %f\n",yhat.x,yhat.y,yhat.z);
-
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
         glUseProgram(sky_program);
@@ -160,7 +141,6 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         DrawModel(skybox, sky_program, "in_Position", "in_Normal", "inTexCoord");
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        //printf("x: %f, z: %f\n",position->x,position->z);
        
         // Tree program
         //      Inits
@@ -180,19 +160,16 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
         glUniformMatrix4fv(glGetUniformLocation(tree_program, "camMatrix"), 1, GL_TRUE, camMatrix);
 		
 	// 	Drawing/placing loop
-        // For time critical debugging
-	clock_gettime(CLOCK_REALTIME, &t1);
 	int i;
 	S(60.0,60.0,60.0,tree_scaleMatrix);
+	// The constant factor says how hugh the area in which the trees will be spread out should be
 	float constant_factor = 6000.0;
-	//int mult_factor_x = (int)(camera_position->x/(2.0*constant_factor));
-	//int mult_factor_z = (int)(camera_position->z/(2.0*constant_factor));
 	int mult_factor_x = (int)(camera_position->x/constant_factor);
 	int mult_factor_z = (int)(camera_position->z/constant_factor);
 	Point3D viewdirection;
+	// Place 200 trees
 	for(i=200;i>0;i=i-1)
 	{
-	  
 	  tree_position.x=2.0*constant_factor*sin((float)i/100.0-0.5);
 
 	  tree_position.z=constant_factor*sin((float)i);
@@ -225,9 +202,6 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 		  DrawModel(tree, tree_program, "inPosition", "inNormal", "texCoord");
 	  }
 	}
-	// For time critical debugging
-	clock_gettime(CLOCK_REALTIME, &t2);
-
         // Terrain program
         glUseProgram(terrain_program);
        
@@ -239,16 +213,12 @@ void World_Draw(Point3D* camera_position, Point3D* camera_look, GLfloat* camMatr
 	curPos[1] = position->y;
 	curPos[2] = position->z;
 	glUniform3fv(glGetUniformLocation(terrain_program, "currentPosition"), 1, curPos);
-        glActiveTexture(GL_TEXTURE5);
+        // Bind the textures
+	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, tex1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, skytex);
 	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, tex_mountain);	// Bind Our Texture tex1
+	glBindTexture(GL_TEXTURE_2D, tex_mountain);	
         DrawModel(tm, terrain_program, "inPosition", "inNormal", "inTexCoord");
-        // For time critical debugging
-	clock_gettime(CLOCK_REALTIME, &t4);
-	
-	// Debugging
-	//printf("******* \n Looptime: %d ns \n Time of the rest: %d ns \n******** \n",t2.tv_nsec-t1.tv_nsec,t4.tv_nsec-t3.tv_nsec-(t2.tv_nsec-t1.tv_nsec));
-}
+       }
