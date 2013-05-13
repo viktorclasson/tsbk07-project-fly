@@ -176,11 +176,12 @@ void Dynamics_CalcRot(GLfloat yawInput, GLfloat pitchInput, GLfloat rollInput,
     MatrixMultPoint3D(rollMat, up, up);
     MatrixMultPoint3D(rollMat, right, right);
 
-    
+    /*
     printf("Pitch: %f, Pitch rate: %f, Pitch input: %f, Pitch state: %d\n", 
 	   pitch, pitchSpeed, pitchInput, pitchState);
     printf("Roll: %f, Roll rate: %f, Roll input: %f, Roll state: %d\n", 
 	   roll, rollSpeed, rollInput, rollState);
+	   */
     
 }
 
