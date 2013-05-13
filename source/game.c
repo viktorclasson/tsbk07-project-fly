@@ -50,7 +50,7 @@ void Game_FindTargetBoundries(void)
 
 void Game_PlaceTargets(void)
 {
-  SetVector(50,140,600,&targetPosition[0]);
+  SetVector(50,150,500,&targetPosition[0]);
   targetAngle[0] = 0;
   SetVector(50,160,650,&targetPosition[1]);
   targetAngle[1] = 0.1;
@@ -97,11 +97,10 @@ void Game_Init(void)
 
   // Scale factor
   sf = 5;
-
   Game_FindTargetBoundries();
 
   // Projection
-  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 1000000.0, projMatrix);
+  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 100000.0, projMatrix);
   
 }
 
@@ -199,7 +198,6 @@ void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos)
   Mult(rot, mdlMatrix, mdlMatrix);
   Mult(trans, mdlMatrix, mdlMatrix);
   
-
 
   // Upload matrices
   glUseProgram(target_program);  

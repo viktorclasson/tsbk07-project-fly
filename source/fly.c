@@ -114,6 +114,10 @@ void display(void)
       // Draw airplane
       Airplane_Draw(&forward, &up, &right, &position, &camera_position, camMatrix);
       
+      // Draw target
+      Game_DrawTarget(camMatrix, &camera_position);
+
+
       // Reset game?
       if(resetFlag == 1)
       {
