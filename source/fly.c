@@ -111,12 +111,11 @@ void display(void)
       // The game loop
       Game_Loop(position);
       
-      // Draw airplane
-      Airplane_Draw(&forward, &up, &right, &position, &camera_position, camMatrix);
-      
       // Draw target
       Game_DrawTarget(camMatrix, &camera_position);
 
+      // Draw airplane
+      Airplane_Draw(&forward, &up, &right, &position, &camera_position, camMatrix);
 
       // Reset game?
       if(resetFlag == 1)
