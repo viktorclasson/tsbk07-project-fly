@@ -18,7 +18,7 @@ void Camera_Update(GLuint firstPersonView, Point3D* forward, Point3D* up, Point3
     ScalarMult(forward, -1, &backward);  
 
     // Calculating camera position (behind and above(in plane coordinates) the plane)
-    SetVector(backward.x, 0, backward.z, &tempPoint3D);
+    SetVector(backward.x, 0.05, backward.z, &tempPoint3D);
     Normalize(&tempPoint3D);
     ScalarMult(&tempPoint3D, 15, &camPosition);
     VectorAdd(&camPosition, position, &camPosition);

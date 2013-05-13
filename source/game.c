@@ -29,7 +29,7 @@ int currentTarget;
 GLfloat xmax, xmin, zmax, zmin, ymax, ymin, maxRadius;
 
 // Matrices
-GLfloat projMatrix[16];
+GLfloat targetProjMatrix[16];
 
 void Game_FindTargetBoundries(void)
 {
@@ -52,24 +52,24 @@ void Game_PlaceTargets(void)
 {
   SetVector(50,150,500,&targetPosition[0]);
   targetAngle[0] = 0;
-  SetVector(50,160,650,&targetPosition[1]);
-  targetAngle[1] = 0.1;
-  SetVector(60,160,800,&targetPosition[2]);
-  targetAngle[2] = -M_PI*0.15;
-  SetVector(80,150,850,&targetPosition[3]);
-  targetAngle[3] = -M_PI*0.20;
-  SetVector(100,150,900,&targetPosition[4]);
-  targetAngle[4] = -M_PI*0.25;
-  SetVector(130,150,930,&targetPosition[5]);
-  targetAngle[5] = -M_PI*0.30;
-  SetVector(160,160,950,&targetPosition[6]);
-  targetAngle[6] = -M_PI*0.35;
-  SetVector(180,160,970,&targetPosition[7]);
-  targetAngle[7] = -M_PI*0.40;
-  SetVector(210,150,1000,&targetPosition[8]);
-  targetAngle[8] = -M_PI*0.45;
-  SetVector(270,150,1000,&targetPosition[9]);
-  targetAngle[9] = -M_PI*0.5;
+  SetVector(60,155,1200,&targetPosition[1]);
+  targetAngle[1] = -M_PI*0.1;
+  SetVector(70,160,1500,&targetPosition[2]);
+  targetAngle[2] = -M_PI*0.1;
+  SetVector(80,160,2000,&targetPosition[3]);
+  targetAngle[3] = -M_PI*0.1;
+  SetVector(70,165,2500,&targetPosition[4]);
+  targetAngle[4] = M_PI*0.1;
+  SetVector(60,155,3000,&targetPosition[5]);
+  targetAngle[5] = M_PI*0.1;
+  SetVector(50,145,3400,&targetPosition[6]);
+  targetAngle[6] = M_PI*0.1;
+  SetVector(40,135,3900,&targetPosition[7]);
+  targetAngle[7] = M_PI*0.1;
+  SetVector(30,130,4500,&targetPosition[8]);
+  targetAngle[8] = M_PI*0.1;
+  SetVector(20,130,5500,&targetPosition[9]);
+  targetAngle[9] = M_PI*0.1;
 }
 
 void Game_Init(void)
@@ -96,11 +96,11 @@ void Game_Init(void)
   currentAngle = targetAngle[currentTarget];
 
   // Scale factor
-  sf = 5;
+  sf = 10;
   Game_FindTargetBoundries();
 
   // Projection
-  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 100000.0, projMatrix);
+  frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 10000000000000000.0, targetProjMatrix);
   
 }
 
@@ -204,7 +204,7 @@ void Game_DrawTarget(GLfloat* camMatrix, Point3D* cameraPos)
 
   glUniformMatrix4fv(glGetUniformLocation(target_program, "mdlMatrix"), 1, GL_TRUE, mdlMatrix);
   glUniformMatrix4fv(glGetUniformLocation(target_program, "camMatrix"), 1, GL_TRUE, camMatrix);
-  glUniformMatrix4fv(glGetUniformLocation(target_program, "projMatrix"), 1, GL_TRUE, projMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(target_program, "projMatrix"), 1, GL_TRUE, targetProjMatrix);
   
   // Prepare camera position and upload it
   GLfloat camPos[3] = { cameraPos->x, cameraPos->y, cameraPos->z };

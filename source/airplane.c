@@ -325,7 +325,7 @@ void Airplane_Init(GLfloat* thrust, GLfloat* yawRate, GLfloat* pitchRate, GLfloa
   planeModels = Models_Init();
   
   
-  *thrust = 5;
+  *thrust = 3;
   *yawRate = 0;
   *pitchRate = 0;
   *rollRate = 0;
